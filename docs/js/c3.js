@@ -1,4 +1,4 @@
-/* @license C3.js v0.7.4 | (c) C3 Team and other contributors | http://c3js.org/ */
+/* @license C3.js v0.7.5 | (c) C3 Team and other contributors | http://c3js.org/ */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -8406,7 +8406,7 @@
       selectedData = sameXData.map(function (d) {
         return $$.addName(d);
       });
-      $$.showTooltip(selectedData, this); // expand points
+      $$.showTooltip(selectedData, this, closest); // expand points
 
       if (config.point_focus_expand_enabled) {
         $$.unexpandCircles();
@@ -11058,7 +11058,7 @@
     };
   };
 
-  ChartInternal.prototype.showTooltip = function (selectedData, element) {
+  ChartInternal.prototype.showTooltip = function (selectedData, element, closest) {
     var $$ = this,
         config = $$.config;
     var tWidth, tHeight, position;
@@ -11072,7 +11072,7 @@
       return;
     }
 
-    $$.tooltip.html(config.tooltip_contents.call($$, selectedData, $$.axis.getXAxisTickFormat(), $$.getYFormat(forArc), $$.color)).style("display", "block"); // Get tooltip dimensions
+    $$.tooltip.html(config.tooltip_contents.call($$, selectedData, $$.axis.getXAxisTickFormat(), $$.getYFormat(forArc), $$.color, closest)).style("display", "block"); // Get tooltip dimensions
 
     tWidth = $$.tooltip.property('offsetWidth');
     tHeight = $$.tooltip.property('offsetHeight');
