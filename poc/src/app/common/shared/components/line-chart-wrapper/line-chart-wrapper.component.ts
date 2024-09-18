@@ -31,6 +31,11 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
 
   customPointsMap: Record<number, CustomPoint> = {}
 
+  constructor() {
+    super()
+    console.time('chart')
+  }
+
   override ngOnInit(): void {
     super.ngOnInit()
   }
@@ -160,6 +165,7 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
     super.ngAfterViewInit()
     this.selectPoints(this.selectedPoints)
     this.customizePoints(this.customPoints)
+    console.timeEnd('chart')
   }
 
   override ngOnChanges(changes: SimpleChanges): void {
