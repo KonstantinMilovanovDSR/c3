@@ -17,13 +17,14 @@ import { ResizeVHandleComponent } from '@src/app/common/shared/components/resize
 import { barChartConfigs } from '@src/app/sandboxes/chart-list-sandbox/chart-list-helper'
 import { ScrollDirection } from '@src/app/common/shared/directives/scroll-direction.directive'
 import { IntersectionObserverOptions } from '@src/app/common/shared/directives/intersection-observer/intersection-observer.types'
+import { IntersectionObserverService } from '@src/app/common/shared/services/intersection-observer.service'
 
 @Component({
   selector: 'lw-chart-list-sandbox',
   templateUrl: './chart-list-sandbox.component.html',
   styleUrls: ['./chart-list-sandbox.component.less'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ChartPanelTrackingService],
+  providers: [ChartPanelTrackingService, IntersectionObserverService],
 })
 export class ChartListSandboxComponent extends SubscriptionHandler implements OnInit {
   readonly pCount = 50
@@ -82,11 +83,15 @@ export class ChartListSandboxComponent extends SubscriptionHandler implements On
 
   visiblePanels: ChartPanelData[] = []
 
-  constructor(private chartPanelTrackingService: ChartPanelTrackingService) {
+  constructor(
+    private chartPanelTrackingService: ChartPanelTrackingService,
+    private intersectionObserverService: IntersectionObserverService
+  ) {
     super()
   }
 
   ngOnInit(): void {
+    // this.intersectionObserverService.init(this.chartList.nativeElement, this.intersectionObserverOptions)
     this.chartPanelTrackingService.init({
       panels: this.panels,
       visibility$: this.visibility$,
@@ -99,6 +104,8 @@ export class ChartListSandboxComponent extends SubscriptionHandler implements On
         this.eventBus.emit({ type: ChartPanelOuterEvent.SHOW_CHART, id })
       },
     })
+
+    this.intersectionObserverService.directionChange$.subscribe((direction) => this.onScrollDirection(direction))
   }
 
   trackItem = (index: number, panel: ChartPanelData) => {

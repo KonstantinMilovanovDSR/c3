@@ -10,6 +10,7 @@ export class IntersectionObserveeDirective implements OnDestroy {
 
   constructor(
     private intersectionObserver: IntersectionObserverDirective,
+    // private intersectionObserverService: IntersectionObserverService,
     private el: ElementRef<HTMLElement>
   ) {
     this.intersectionObserver.observe(this.el.nativeElement, (entries) => {
