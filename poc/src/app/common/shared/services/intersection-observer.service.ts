@@ -12,14 +12,6 @@ export class IntersectionObserverService implements OnDestroy {
   private intersectionObserver: IntersectionObserver
 
   private subscription = new Subscription()
-  private direction: ScrollDirection = 'down'
-  private currentScroll = 0
-  private timeThreshold = DEBOUNCE_TIME_SMALL / 2
-  private lastTimestamp = 0
-
-  private directionChange = new Subject<ScrollDirection>()
-
-  directionChange$ = this.directionChange.asObservable()
 
   init(rootElement: HTMLElement, options: IntersectionObserverOptions): void {
     this.options = options
@@ -36,29 +28,6 @@ export class IntersectionObserverService implements OnDestroy {
         rootMargin: this.options.rootMargin,
         threshold: this.options.threshold,
       }
-    )
-
-    this.subscription.add(
-      fromEvent(this.rootElement, 'scroll')
-        .pipe(
-          map((event) => {
-            const scrollTop = (event.target as Element).scrollTop
-            const time = new Date().getTime()
-            const timeOffset = time - this.lastTimestamp
-            const scrollOffset = scrollTop - this.currentScroll
-            if (timeOffset > this.timeThreshold) {
-              this.direction = scrollOffset < 0 ? 'up' : 'down'
-            }
-            this.currentScroll = scrollTop
-            this.lastTimestamp = time
-            return this.direction
-          }),
-
-          distinctUntilChanged()
-        )
-        .subscribe((direction) => {
-          this.directionChange.next(direction)
-        })
     )
   }
 

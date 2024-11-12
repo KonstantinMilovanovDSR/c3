@@ -104,8 +104,6 @@ export class ChartListSandboxComponent extends SubscriptionHandler implements On
         this.eventBus.emit({ type: ChartPanelOuterEvent.SHOW_CHART, id })
       },
     })
-
-    this.intersectionObserverService.directionChange$.subscribe((direction) => this.onScrollDirection(direction))
   }
 
   trackItem = (index: number, panel: ChartPanelData) => {
