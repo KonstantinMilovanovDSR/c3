@@ -222,6 +222,7 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
 
   protected topLimitEnable(limit: number) {
     const domain = this.getCurrentXDomain()
+    // TODO: support bottom limit
     this.instance?.load({ columns: [[TOP_LIMIT_DATA_SET, ...this.dataSet.map(() => limit)]] })
     this.instance?.zoom(domain)
   }
