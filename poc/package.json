@@ -24,6 +24,7 @@
     "@angular/router": "18.1.1",
     "angular-resizable-element-labworks": "7.0.3",
     "d3": "^5.8.0",
+    "html-to-image": "^1.11.11",
     "lodash": "4.17.21",
     "normalize.css": "8.0.1",
     "rxjs": "~7.8.0",

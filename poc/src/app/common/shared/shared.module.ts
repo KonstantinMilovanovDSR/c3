@@ -12,6 +12,7 @@ import { PurePipeCreator } from '@src/app/common/shared/pipes/pure-pipe-creator'
 import { IntersectionObserverDirective } from '@src/app/common/shared/directives/intersection-observer/intersection-observer.directive'
 import { IntersectionRootDirective } from '@src/app/common/shared/directives/intersection-observer/intersection-root.directive'
 import { IntersectionObserveeDirective } from '@src/app/common/shared/directives/intersection-observer/intersection-observee.directive'
+import { PopupComponent } from '@src/app/common/shared/components/popup/popup.component'
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { IntersectionObserveeDirective } from '@src/app/common/shared/directives
     NumberInputComponent,
     ChartPanelComponent,
     ResizeVHandleComponent,
+    PopupComponent,
     ScrollDirectionDirective,
     IntersectionObserverDirective,
     IntersectionObserveeDirective,

@@ -52,6 +52,10 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
 
   @ViewChild('chart', { static: true }) chart!: ElementRef
 
+  height = 420
+  popups = []
+  showPopups = true
+
   protected instance!: any
 
   protected params: any
@@ -82,6 +86,8 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
       params.grid.x = params.grid.x || {}
       params.grid.x.lines = params.grid.x.lines || this.xGridLines
     }
+    setTimeout(() => (this.height = this.chart.nativeElement?.getBoundingClientRect().height))
+    console.log(this.chart, this.height)
   }
 
   protected abstract getParams(): any

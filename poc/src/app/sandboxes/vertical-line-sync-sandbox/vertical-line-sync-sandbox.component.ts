@@ -20,6 +20,7 @@ import { MIN_DOMAIN_RANGE } from '@src/app/common/shared/components/chart-wrappe
 import { customPointsHandler } from '@src/app/common/utils/custom-points.helper'
 import { DEBOUNCE_TIME_SMALL } from '@src/app/common/constants/constants'
 import { debounceTime, fromEvent } from 'rxjs'
+import * as htmlToImage from 'html-to-image'
 
 @Component({
   selector: 'lw-vertical-line-sync-sandbox',
@@ -63,6 +64,22 @@ export class VerticalLineSyncSandboxComponent {
     this.maxDataSetValueLengths = getMaxLengthOfElementsAndGetDifferences(
       ...(this.yGridLinesTopLimitEnabled ? this.dataSetsWithTopLimit : this.dataSets)
     )
+  }
+  exportToSvg(): void {
+    setTimeout(async () => {
+      const el = document.getElementById('chartWrapper')
+      const fontEmbedCSS = await htmlToImage.getFontEmbedCSS(el)
+      htmlToImage
+        .toSvg(el, { fontEmbedCSS })
+        .then(function (dataUrl) {
+          const img = new Image()
+          img.src = dataUrl
+          document.body.appendChild(img)
+        })
+        .catch(function (error) {
+          console.error('oops, something went wrong!', error)
+        })
+    }, 100)
   }
 
   dataSetTop: number[] = this.dataSetUpdate(this.minY1, this.maxY1)

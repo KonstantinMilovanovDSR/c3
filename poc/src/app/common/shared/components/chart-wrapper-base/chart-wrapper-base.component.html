@@ -1,1 +1,10 @@
-<div #chart class="chart"></div>
+<div id="chartWrapper">
+  <div #chart class="chart"></div>
+  <ng-container *ngIf="showPopups">
+    <ng-container *ngFor="let popup of popups">
+      <div style="position: absolute" [ngStyle]="{ 'left.px': popup.x, 'top.px': popup.y }">
+        <lw-popup></lw-popup>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>

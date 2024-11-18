@@ -1,4 +1,15 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core'
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ComponentRef,
+  EmbeddedViewRef,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+  ViewContainerRef,
+} from '@angular/core'
 import { DataPoint, Domain, PrimitiveArray } from 'c3'
 import { arrayToObject, getNeededSpaces } from '@src/app/common/utils/helpers'
 import { ChartWrapperBaseComponent } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.component'
@@ -14,6 +25,7 @@ import {
   SELECTED_POINT_R,
   TOP_LIMIT_DATA_SET,
 } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.consts'
+import { PopupComponent } from '@src/app/common/shared/components/popup/popup.component'
 
 @Component({
   selector: 'lw-line-chart-wrapper',
@@ -29,15 +41,31 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
   @Input() customPointsHandler: CustomPointsHandler
   @Input() maxDataSetValueLength: number
 
+  popupShadow: ComponentRef<PopupComponent>
+
   customPointsMap: Record<number, CustomPoint> = {}
 
-  constructor() {
+  constructor(private viewContainerRef: ViewContainerRef) {
     super()
     console.time('chart')
   }
 
   override ngOnInit(): void {
     super.ngOnInit()
+    this.popupShadow = this.viewContainerRef.createComponent(PopupComponent)
+    const popupShadowEl = (this.popupShadow.hostView as EmbeddedViewRef<any>).rootNodes[0]
+    popupShadowEl.style.zIndex = -1
+    console.log(popupShadowEl.getBoundingClientRect().height)
+  }
+
+  private updatePopupsProps(): void {
+    console.log(this.popups.map((pp) => pp.element.getBBox()))
+    const barsWidth = this.chart.nativeElement.querySelector('.c3-axis.c3-axis-y')?.getBoundingClientRect().width
+    this.popups.forEach((popup) => {
+      const bbox = popup.element.getBBox()
+      popup.x = bbox.x + barsWidth
+      popup.y = bbox.y
+    })
   }
 
   protected override getParams(): any {
@@ -52,6 +80,22 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
         selection: {
           enabled: this.useSelection,
         },
+        onclick: (d, element) => {
+          const barsWidth = this.chart.nativeElement.querySelector('.c3-axis.c3-axis-y')?.getBoundingClientRect().width
+          const bbox = element.getBBox()
+          // console.log(d, element, barsWidth, bbox, this.chart.nativeElement, this.chart.nativeElement.querySelector('.chart.c3'))
+          // console.log(`translate(${bbox.x + barsWidth}px, ${bbox.y - this.height}px)`)
+          this.popups.push({ x: bbox.x + barsWidth, y: bbox.y, point: d, element })
+          // console.log(this.instance.data())
+          this.showPopups = true
+        },
+        ondragstart: () => {
+          this.showPopups = false
+        },
+        ondragend: () => {
+          this.showPopups = true
+          this.updatePopupsProps()
+        },
       },
       zoom: {
         enabled: true,
@@ -61,9 +105,13 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
         },
         onzoomstart: () => {
           this.onZoomStart()
+          this.showPopups = false
         },
         onzoomend: (domain: Domain) => {
+          console.log(domain)
           this.onZoomEnd(domain)
+          this.showPopups = true
+          this.updatePopupsProps()
         },
       },
       legend: {
