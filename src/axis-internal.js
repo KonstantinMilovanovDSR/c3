@@ -258,6 +258,9 @@ AxisInternal.prototype.generateAxis = function () {
                 internal.tickOffset = Math.ceil((scale1(1) - scale1(0)) / 2);
                 tickX = internal.tickCentered ? 0 : internal.tickOffset;
                 tickY = internal.tickCentered ? internal.tickOffset : 0;
+            } else if (params.syncScale) {
+                const ticksRange = ticksValues[ticksValues.length - 1]
+                internal.tickOffset = (scale1(1) - scale1(0)) / (internal.scale.range()[1] / Math.floor(ticksRange));
             } else {
                 internal.tickOffset = tickX = 0;
             }
@@ -401,8 +404,17 @@ AxisInternal.prototype.generateAxis = function () {
             interval = internal.tickOffset * 2;
         }
         else {
+            let mult = 1
+            let size
+            if (params.syncScale) {
+                mult = internal.tickOffset
+                size = internal.component.owner.data.targets[0].values.length
+            } else {
+                size = axis.g.selectAll('line').size()
+            }
+            console.log(size)
             length = axis.g.select('path.domain').node().getTotalLength() - internal.outerTickSize * 2;
-            interval = length / axis.g.selectAll('line').size();
+            interval = mult * ( length / size);
         }
         return interval === Infinity ? 0 : interval;
     };
