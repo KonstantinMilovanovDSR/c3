@@ -60,6 +60,7 @@ Axis.prototype.getXAxis = function getXAxis(scale, orient, tickFormat, tickValue
             tickWidth: config.axis_x_tick_width,
             tickTextRotate: withoutRotateTickText ? 0 : config.axis_x_tick_rotate,
             withoutTransition: withoutTransition,
+            syncScale: config.bar_syncScale
         },
         axis = new this.internal(this, axisParams).axis.scale(scale).orient(orient);
 
