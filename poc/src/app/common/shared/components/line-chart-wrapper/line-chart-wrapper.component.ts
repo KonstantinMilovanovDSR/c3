@@ -74,12 +74,13 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
   updatePopup = ({ popup, bbox, barsWidth, eventRectWidth, popupWidth }): void => {
     popup.x = this.calculatePopupX({ bbox, barsWidth, eventRectWidth, popupWidth })
     popup.y = bbox.y + this.POPUP_OFFSET_TOP
-    popup.show = bbox.x >= -5 && bbox.x <= eventRectWidth
+    popup.show = bbox.x >= this.POPUP_HIDE_GAP && bbox.x <= eventRectWidth
   }
 
   POPUP_OFFSET_LEFT = -3
   POPUP_OFFSET_RIGHT = 5
   POPUP_OFFSET_TOP = 10
+  POPUP_HIDE_GAP = -5
 
   protected override getParams(): any {
     return {
@@ -100,7 +101,7 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
               y: bbox.y + this.POPUP_OFFSET_TOP,
               point: d,
               element,
-              show: bbox.x >= -5 && bbox.x <= eventRectWidth,
+              show: bbox.x >= this.POPUP_HIDE_GAP && bbox.x <= eventRectWidth,
               index: d.index,
               data: d.value,
               clicked: removeCallback,
