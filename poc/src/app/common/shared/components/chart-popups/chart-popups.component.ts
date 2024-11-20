@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Injector,
   Input,
@@ -10,7 +11,6 @@ import {
 } from '@angular/core'
 import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
 import { ChartPopupsService } from '@src/app/common/shared/components/chart-popups/chart-popups.service'
-import { ChartWrapperBaseComponent } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.component'
 import { CHART_EVENT_TYPE, CHART_TYPE, ChartEvent } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.types'
 import { SubscriptionHandler } from '@src/app/common/utils/subscription-handler'
 import { ChartHelpersService } from '@src/app/common/shared/components/chart-popups/services/chart-helpers.service'
@@ -25,7 +25,9 @@ import { ChartHelpersLineService } from '@src/app/common/shared/components/chart
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartPopupsComponent extends SubscriptionHandler implements OnInit {
-  @Input() chart: ChartWrapperBaseComponent
+  @Input() chart: ElementRef
+  @Input() type: CHART_TYPE
+  @Input() chartId: string | number
   @Input() eventBus = new EventEmitter<ChartEvent>()
 
   private helperService: ChartHelpersService
@@ -47,7 +49,7 @@ export class ChartPopupsComponent extends SubscriptionHandler implements OnInit 
   }
 
   private initHelperService(): void {
-    switch (this.chart.type) {
+    switch (this.type) {
       case CHART_TYPE.BAR:
         this.helperService = this.injector.get<ChartHelpersBarService>(ChartHelpersBarService)
         break
@@ -60,9 +62,9 @@ export class ChartPopupsComponent extends SubscriptionHandler implements OnInit 
   private initWrapperPopup(): void {
     this.chartPopupsService.init({
       viewContainerRef: this.viewContainerRef,
-      chart: this.chart.chart,
+      chart: this.chart,
       popupsStoreService: this.popupsStoreService,
-      chartId: this.chart.chartId,
+      chartId: this.chartId,
       updatePopup: this.helperService.updatePopup,
       xBarClass: this.helperService.xBarClass,
     })

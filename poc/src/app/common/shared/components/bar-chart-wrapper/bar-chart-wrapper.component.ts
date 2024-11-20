@@ -1,13 +1,4 @@
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  Input,
-  OnChanges,
-  OnInit,
-  SimpleChanges,
-} from '@angular/core'
+import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core'
 import { DataPoint, Domain } from 'c3'
 import {
   MAIN_DATA_SET,
@@ -42,7 +33,7 @@ export class BarChartWrapperComponent extends ChartWrapperBaseComponent implemen
     super.ngOnInit()
   }
 
-  constructor(private changeDetectorRef: ChangeDetectorRef) {
+  constructor() {
     super()
     console.time('chart')
   }
@@ -80,7 +71,6 @@ export class BarChartWrapperComponent extends ChartWrapperBaseComponent implemen
         },
         onclick: (d, element) => {
           this.eventBus.emit({ type: CHART_EVENT_TYPE.CLICK, data: { d, element } })
-          this.changeDetectorRef.markForCheck()
         },
       },
       bar: {

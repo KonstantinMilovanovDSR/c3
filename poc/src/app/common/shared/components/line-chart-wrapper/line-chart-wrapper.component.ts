@@ -1,13 +1,4 @@
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  Input,
-  OnChanges,
-  OnInit,
-  SimpleChanges,
-} from '@angular/core'
+import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core'
 import { DataPoint, Domain, PrimitiveArray } from 'c3'
 import { arrayToObject, getNeededSpaces } from '@src/app/common/utils/helpers'
 import { ChartWrapperBaseComponent } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.component'
@@ -43,7 +34,7 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
 
   type = CHART_TYPE.LINE
 
-  constructor(private changeDetectorRef: ChangeDetectorRef) {
+  constructor() {
     super()
     console.time('chart')
   }
@@ -65,7 +56,6 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
         },
         onclick: (d, element) => {
           this.eventBus.emit({ type: CHART_EVENT_TYPE.CLICK, data: { d, element } })
-          this.changeDetectorRef.markForCheck()
         },
       },
       zoom: {

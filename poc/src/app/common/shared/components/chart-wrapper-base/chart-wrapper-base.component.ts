@@ -51,7 +51,7 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
   @Output() afterInit = new EventEmitter()
   @Output() pointer = new EventEmitter<ChartPoint>()
 
-  @ViewChild('chart', { static: true }) chart!: ElementRef
+  @ViewChild('chart', { static: true }) chartRef!: ElementRef
 
   eventBus = new EventEmitter<ChartEvent>()
 
@@ -89,7 +89,7 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
       params.grid.x = params.grid.x || {}
       params.grid.x.lines = params.grid.x.lines || this.xGridLines
     }
-    setTimeout(() => (this.height = this.chart.nativeElement?.getBoundingClientRect().height))
+    setTimeout(() => (this.height = this.chartRef.nativeElement?.getBoundingClientRect().height))
   }
 
   protected abstract getParams(): any
@@ -130,7 +130,7 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
     const id = this.extractIdFromBindTo(this.params.bindto)
     this.setElementId(id)
     this.instance = c3.generate({
-      bindto: id || this.chart.nativeElement,
+      bindto: id || this.chartRef.nativeElement,
       ...this.params,
     })
     this.params.chartObj = this.instance
@@ -148,7 +148,7 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
 
   protected setElementId(id: string): void {
     if (id) {
-      this.chart.nativeElement.id = id
+      this.chartRef.nativeElement.id = id
     }
   }
 
