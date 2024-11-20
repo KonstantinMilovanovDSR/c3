@@ -5,6 +5,7 @@ ChartInternal.prototype.getDefaultConfig = function () {
     var config = {
         bindto: '#chart',
         svg_classname: undefined,
+        svg_relativeClipPath: undefined,
         size_width: undefined,
         size_height: undefined,
         /*
