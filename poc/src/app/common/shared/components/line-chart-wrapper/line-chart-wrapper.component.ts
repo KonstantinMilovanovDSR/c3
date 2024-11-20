@@ -3,8 +3,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ComponentRef,
-  EmbeddedViewRef,
   EventEmitter,
   Input,
   OnChanges,
@@ -14,7 +12,7 @@ import {
   ViewContainerRef,
 } from '@angular/core'
 import { DataPoint, Domain, PrimitiveArray } from 'c3'
-import { arrayToObject, getNeededSpaces, throttleTime } from '@src/app/common/utils/helpers'
+import { arrayToObject, getNeededSpaces } from '@src/app/common/utils/helpers'
 import { ChartWrapperBaseComponent } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.component'
 import {
   CustomPoint,
@@ -28,13 +26,14 @@ import {
   SELECTED_POINT_R,
   TOP_LIMIT_DATA_SET,
 } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.consts'
-import { PopupComponent } from '@src/app/common/shared/components/popup/popup.component'
 import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
+import { ChartWrapperPopupsService } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-popups.service'
 
 @Component({
   selector: 'lw-line-chart-wrapper',
   templateUrl: '../chart-wrapper-base/chart-wrapper-base.component.html',
   styleUrls: ['../chart-wrapper-base/chart-wrapper-base.component.less', './line-chart-wrapper.component.less'],
+  providers: [ChartWrapperPopupsService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LineChartWrapperComponent extends ChartWrapperBaseComponent implements OnInit, AfterViewInit, OnChanges {
@@ -44,58 +43,51 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
   @Input() customPoints: CustomPoint[] = []
   @Input() customPointsHandler: CustomPointsHandler
   @Input() maxDataSetValueLength: number
+  @Input() popups: any[]
+  @Input() customViewContainerRef: ViewContainerRef
 
   @Output() popupsUpdated = new EventEmitter()
-
-  popupShadow: ComponentRef<PopupComponent>
 
   customPointsMap: Record<number, CustomPoint> = {}
 
   constructor(
     private viewContainerRef: ViewContainerRef,
     private changeDetectorRef: ChangeDetectorRef,
+    chartWrapperPopupsService: ChartWrapperPopupsService,
     popupsStoreService: PopupsStoreService
   ) {
-    super(popupsStoreService)
+    super(popupsStoreService, chartWrapperPopupsService)
     console.time('chart')
   }
-  updatePopupsThrottle = throttleTime(() => this.updatePopupsProps(), 5)
-
   override ngOnInit(): void {
     super.ngOnInit()
-    this.popupShadow = this.viewContainerRef.createComponent(PopupComponent)
-    const popupShadowEl = (this.popupShadow.hostView as EmbeddedViewRef<any>).rootNodes[0]
-    popupShadowEl.style.zIndex = -1
-  }
-
-  popupWidth = 0
-  xBarWidth = 0
-  chartWidth = 0
-
-  OFFSET_LEFT = -3
-  OFFSET_RIGHT = 5
-  OFFSET_TOP = 10
-
-  private updateWidths(): void {
-    this.popupWidth = (this.popupShadow.hostView as EmbeddedViewRef<any>).rootNodes[0].getBoundingClientRect().width
-    this.xBarWidth = this.chart.nativeElement.querySelector('.c3-grid.c3-grid-lines').getBoundingClientRect().width
-    this.chartWidth = this.chart.nativeElement.getBoundingClientRect().width
-  }
-
-  private updatePopupsProps(): void {
-    const eventRectWidth = this.chart.nativeElement.querySelector('.c3-event-rect').getBoundingClientRect().width
-    const barsWidth = this.chartWidth - this.xBarWidth
-    this.popupsStoreService.popups[this.chartId].forEach((popup) => {
-      const bbox = popup.element.getBBox()
-      const popupX =
-        bbox.x + barsWidth + this.popupWidth <= eventRectWidth
-          ? bbox.x + barsWidth + this.OFFSET_RIGHT
-          : bbox.x + barsWidth - this.popupWidth - this.OFFSET_LEFT
-      popup.x = popupX
-      popup.y = bbox.y + this.OFFSET_TOP
-      popup.show = bbox.x >= -5 && bbox.x <= eventRectWidth
+    this.chartWrapperPopupsService.init({
+      viewContainerRef: this.customViewContainerRef || this.viewContainerRef,
+      chart: this.chart,
+      popupsStoreService: this.popupsStoreService,
+      chartId: this.chartId,
+      updatePopup: this.updatePopup,
+      xBarClass: '.c3-grid.c3-grid-lines',
+      popups: this.popups,
     })
   }
+
+  private calculatePopupX({ bbox, barsWidth, eventRectWidth, popupWidth }): number {
+    return bbox.x + barsWidth + popupWidth <= eventRectWidth
+      ? bbox.x + barsWidth + this.POPUP_OFFSET_RIGHT
+      : bbox.x + barsWidth - popupWidth - this.POPUP_OFFSET_LEFT
+  }
+
+  updatePopup = ({ popup, bbox, barsWidth, eventRectWidth, popupWidth }): void => {
+    popup.x = this.calculatePopupX({ bbox, barsWidth, eventRectWidth, popupWidth })
+    popup.y = bbox.y + this.POPUP_OFFSET_TOP
+    popup.show = bbox.x >= this.POPUP_HIDE_GAP && bbox.x <= eventRectWidth
+  }
+
+  POPUP_OFFSET_LEFT = -3
+  POPUP_OFFSET_RIGHT = 5
+  POPUP_OFFSET_TOP = 10
+  POPUP_HIDE_GAP = -5
 
   protected override getParams(): any {
     return {
@@ -113,27 +105,19 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
           enabled: this.useSelection,
         },
         onclick: (d, element) => {
-          if (this.popupsStoreService.popups[this.chartId].find((popup) => popup.index === d.index)) {
-            return
+          const createPopup = ({ bbox, barsWidth, eventRectWidth, popupWidth, removeCallback }) => {
+            return {
+              x: this.calculatePopupX({ bbox, barsWidth, eventRectWidth, popupWidth }),
+              y: bbox.y + this.POPUP_OFFSET_TOP,
+              point: d,
+              element,
+              show: bbox.x >= this.POPUP_HIDE_GAP && bbox.x <= eventRectWidth,
+              index: d.index,
+              data: d.value,
+              clicked: removeCallback,
+            }
           }
-          this.updateWidths()
-          const eventRectWidth = this.chart.nativeElement.querySelector('.c3-event-rect').getBoundingClientRect().width
-          const bbox = element.getBBox()
-          const barsWidth = this.chartWidth - this.xBarWidth
-          const popupX =
-            bbox.x + barsWidth + this.popupWidth <= eventRectWidth
-              ? bbox.x + barsWidth + this.OFFSET_RIGHT
-              : bbox.x + barsWidth - this.popupWidth - this.OFFSET_LEFT
-          this.popupsStoreService.popups[this.chartId].push({
-            x: popupX,
-            y: bbox.y + this.OFFSET_TOP,
-            point: d,
-            element,
-            show: bbox.x >= -5 && bbox.x <= eventRectWidth,
-            index: d.index,
-            data: d.value,
-          })
-          this.showPopups = true
+          this.chartWrapperPopupsService.onPointClick(d, element, createPopup)
           this.changeDetectorRef.markForCheck()
           this.popupsUpdated.emit(this.popupsStoreService.popups)
         },
@@ -143,7 +127,7 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
         rescale: true,
         onzoom: (domain: Domain) => {
           this.onZoom(domain)
-          this.updatePopupsThrottle()
+          this.chartWrapperPopupsService.updatePopupsThrottle()
         },
         onzoomstart: () => {
           this.onZoomStart()
@@ -251,10 +235,7 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
     super.ngAfterViewInit()
     this.selectPoints(this.selectedPoints)
     this.customizePoints(this.customPoints)
-    this.popupsStoreService.popups[this.chartId].forEach((popup) => {
-      popup.element = this.chart.nativeElement.querySelector('.c3-circle-' + popup.index)
-    })
-    this.updateWidths()
+    this.chartWrapperPopupsService.afterViewInit('.c3-circle-')
   }
 
   override ngOnChanges(changes: SimpleChanges): void {

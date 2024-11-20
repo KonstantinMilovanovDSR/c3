@@ -45,6 +45,7 @@ interface ChartInfo {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VerticalLineSyncSandboxComponent implements OnInit {
+  readonly POPUP_HEIGHT = 175
   pCount = 100
 
   minY: number[] = [10, 10]
@@ -145,12 +146,13 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
         maxY = item.y
       }
     })
-    return { width: chartRect.width, height: Math.max(chartRect.height, maxY + 150) }
+    return { width: chartRect.width, height: Math.max(chartRect.height, maxY + this.POPUP_HEIGHT) }
   }
 
   async createHTML() {
     for (let i = 0; i < this.chartInfos.length; i++) {
       const component = this.dynamicChartsContainer.createComponent(LineChartWrapperComponent)
+
       component.instance.dataSet = this.chartInfos[i].dataSet
       component.instance.size = this.chartSize
       component.instance.hideXTicks = true
@@ -159,6 +161,9 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
       component.instance.customPoints = this.customPoints
       component.instance.initialDomain = this.currentDomain
       component.instance.relativeClipPath = true
+      component.instance.popups = this.chartInfos[i].popups
+      component.instance.customViewContainerRef = this.dynamicChartsContainer
+
       const element: HTMLElement = component.location.nativeElement
       element.style.setProperty('width', `${this.chartSize.width}px`)
       element.style.setProperty('height', `${this.chartSize.height}px`)
