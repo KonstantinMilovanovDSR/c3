@@ -151,6 +151,7 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
 
   async createHTML() {
     for (let i = 0; i < this.chartInfos.length; i++) {
+      console.time('chart' + i)
       const component = this.dynamicChartsContainer.createComponent(LineChartWrapperComponent)
 
       component.instance.dataSet = this.chartInfos[i].dataSet
@@ -159,16 +160,20 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
       component.instance.yGridLines = this.yGridLines
       component.instance.yGridLinesTopLimitEnabled = this.yGridLinesTopLimitEnabled
       component.instance.customPoints = this.customPoints
+      component.instance.customPointsHandler = this.customPointsHandler
+      component.instance.selectedPoints = this.selectedPoints
       component.instance.initialDomain = this.currentDomain
       component.instance.relativeClipPath = true
       component.instance.popups = this.chartInfos[i].popups
       component.instance.customViewContainerRef = this.dynamicChartsContainer
+      component.instance.useSelection = true
 
       const element: HTMLElement = component.location.nativeElement
       element.style.setProperty('width', `${this.chartSize.width}px`)
       element.style.setProperty('height', `${this.chartSize.height}px`)
       await this.exportToSvg(i, element)
       component.destroy()
+      console.timeEnd('chart' + i)
     }
   }
 
