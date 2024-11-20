@@ -12,6 +12,11 @@ import { PurePipeCreator } from '@src/app/common/shared/pipes/pure-pipe-creator'
 import { IntersectionObserverDirective } from '@src/app/common/shared/directives/intersection-observer/intersection-observer.directive'
 import { IntersectionRootDirective } from '@src/app/common/shared/directives/intersection-observer/intersection-root.directive'
 import { IntersectionObserveeDirective } from '@src/app/common/shared/directives/intersection-observer/intersection-observee.directive'
+import { PopupComponent } from '@src/app/common/shared/components/popup/popup.component'
+import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
+import { ChartPopupsComponent } from '@src/app/common/shared/components/chart-popups/chart-popups.component'
+import { ChartHelpersLineService } from '@src/app/common/shared/components/chart-popups/services/chart-helpers-line.service'
+import { ChartHelpersBarService } from '@src/app/common/shared/components/chart-popups/services/chart-helpers-bar.service'
 
 @NgModule({
   declarations: [
@@ -20,6 +25,8 @@ import { IntersectionObserveeDirective } from '@src/app/common/shared/directives
     NumberInputComponent,
     ChartPanelComponent,
     ResizeVHandleComponent,
+    PopupComponent,
+    ChartPopupsComponent,
     ScrollDirectionDirective,
     IntersectionObserverDirective,
     IntersectionObserveeDirective,
@@ -39,6 +46,6 @@ import { IntersectionObserveeDirective } from '@src/app/common/shared/directives
     IntersectionRootDirective,
     PurePipeCreator,
   ],
-  providers: [],
+  providers: [PopupsStoreService, ChartHelpersLineService, ChartHelpersBarService],
 })
 export class SharedModule {}

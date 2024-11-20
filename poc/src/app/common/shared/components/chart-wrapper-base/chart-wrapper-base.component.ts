@@ -26,10 +26,11 @@ import {
 } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.consts'
 import c3 from '@src/app/c3/src/index.js'
 import * as d3 from 'd3'
+import { CHART_EVENT_TYPE, CHART_TYPE, ChartEvent } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.types'
 
 @Component({ template: '' })
 export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
-  @Input() chartId = `chart_${generateId()}`
+  @Input() chartId: string | number = `chart_${generateId()}`
   @Input() size: ChartSize
   @Input() xAxisMaxLength = X_AXIS_MAX_LENGTH_DEFAULT
   @Input() isDomainCorrect: CheckDomainPredicate
@@ -41,6 +42,7 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
   @Input() yGridLinesTopLimitEnabled = false
   @Input() xGridLines: GridLine[] = []
   @Input() hideXTicks = false
+  @Input() relativeClipPath: boolean
 
   @Output() showXGridFocus = new EventEmitter<DataPoint>()
   @Output() hideXGridFocus = new EventEmitter<void>()
@@ -50,7 +52,13 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
   @Output() afterInit = new EventEmitter()
   @Output() pointer = new EventEmitter<ChartPoint>()
 
-  @ViewChild('chart', { static: true }) chart!: ElementRef
+  @ViewChild('chart', { static: true }) chartRef!: ElementRef
+
+  eventBus = new EventEmitter<ChartEvent>()
+
+  abstract type: CHART_TYPE
+
+  height = 420
 
   protected instance!: any
 
@@ -82,6 +90,7 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
       params.grid.x = params.grid.x || {}
       params.grid.x.lines = params.grid.x.lines || this.xGridLines
     }
+    setTimeout(() => (this.height = this.chartRef.nativeElement?.getBoundingClientRect().height))
   }
 
   protected abstract getParams(): any
@@ -111,6 +120,7 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
     this.setInitialZoom()
     this.initComplete = true
     this.afterInit.emit()
+    this.eventBus.emit({ type: CHART_EVENT_TYPE.AFTER_INIT })
   }
 
   ngOnDestroy(): void {
@@ -121,7 +131,7 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
     const id = this.extractIdFromBindTo(this.params.bindto)
     this.setElementId(id)
     this.instance = c3.generate({
-      bindto: id || this.chart.nativeElement,
+      bindto: id || this.chartRef.nativeElement,
       ...this.params,
     })
     this.params.chartObj = this.instance
@@ -139,7 +149,7 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
 
   protected setElementId(id: string): void {
     if (id) {
-      this.chart.nativeElement.id = id
+      this.chartRef.nativeElement.id = id
     }
   }
 

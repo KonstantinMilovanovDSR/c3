@@ -1,0 +1,7 @@
+<div *ngIf="chartPopupsService.showPopups">
+  <ng-container *ngFor="let popup of popupsStoreService.popups[chartPopupsService.chartId]">
+    <div [hidden]="!popup.show" class="chart-popups__popup" [ngStyle]="{ 'left.px': popup.x, 'top.px': popup.y }">
+      <lw-popup [data]="popup.data" (clicked)="popup.clicked()"></lw-popup>
+    </div>
+  </ng-container>
+</div>

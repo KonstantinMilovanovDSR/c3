@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core'
-import { DataPoint, Domain, PrimitiveArray } from 'c3'
+import { DataPoint, Domain } from 'c3'
 import {
   MAIN_DATA_SET,
   NDC_DATA_SET,
@@ -8,6 +8,7 @@ import {
 } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.consts'
 import { ChartWrapperBaseComponent } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.component'
 import { BarChartDataSet } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper.types'
+import { CHART_EVENT_TYPE, CHART_TYPE } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.types'
 
 @Component({
   selector: 'lw-bar-chart-wrapper',
@@ -26,8 +27,15 @@ export class BarChartWrapperComponent extends ChartWrapperBaseComponent implemen
   private x2DataSet: number[] = []
   private chartPadding: number
 
+  type = CHART_TYPE.BAR
+
   override ngOnInit(): void {
     super.ngOnInit()
+  }
+
+  constructor() {
+    super()
+    console.time('chart')
   }
 
   protected override getParams(): any {
@@ -61,6 +69,9 @@ export class BarChartWrapperComponent extends ChartWrapperBaseComponent implemen
           [MAIN_DATA_SET]: 'bar',
           [NDC_DATA_SET]: 'spline',
         },
+        onclick: (d, element) => {
+          this.eventBus.emit({ type: CHART_EVENT_TYPE.CLICK, data: { d, element } })
+        },
       },
       bar: {
         width: {
@@ -73,6 +84,7 @@ export class BarChartWrapperComponent extends ChartWrapperBaseComponent implemen
         rescale: true,
         onzoom: (domain: Domain) => {
           this.onZoom(domain)
+          this.eventBus.emit({ type: CHART_EVENT_TYPE.ZOOM })
         },
         onzoomstart: () => {
           this.onZoomStart()

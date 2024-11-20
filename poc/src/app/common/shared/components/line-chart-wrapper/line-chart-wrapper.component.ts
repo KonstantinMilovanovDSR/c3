@@ -1,4 +1,16 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core'
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+  ViewContainerRef,
+} from '@angular/core'
 import { DataPoint, Domain, PrimitiveArray } from 'c3'
 import { arrayToObject, getNeededSpaces } from '@src/app/common/utils/helpers'
 import { ChartWrapperBaseComponent } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.component'
@@ -14,6 +26,8 @@ import {
   SELECTED_POINT_R,
   TOP_LIMIT_DATA_SET,
 } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.consts'
+import { CHART_EVENT_TYPE, CHART_TYPE } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.types'
+import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
 
 @Component({
   selector: 'lw-line-chart-wrapper',
@@ -28,14 +42,19 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
   @Input() customPoints: CustomPoint[] = []
   @Input() customPointsHandler: CustomPointsHandler
   @Input() maxDataSetValueLength: number
+  @Input() popups: any[]
+  @Input() customViewContainerRef: ViewContainerRef
+
+  @Output() popupsUpdated = new EventEmitter()
 
   customPointsMap: Record<number, CustomPoint> = {}
 
-  constructor() {
+  type = CHART_TYPE.LINE
+
+  constructor(public popupsStoreService: PopupsStoreService) {
     super()
     console.time('chart')
   }
-
   override ngOnInit(): void {
     super.ngOnInit()
   }
@@ -44,6 +63,9 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
     return {
       bindto: `#${this.chartId}`,
       size: this.size,
+      svg: {
+        relativeClipPath: this.relativeClipPath,
+      },
       data: {
         columns: [[MAIN_DATA_SET, ...this.dataSet]],
         types: {
@@ -52,12 +74,17 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
         selection: {
           enabled: this.useSelection,
         },
+        onclick: (d, element) => {
+          this.eventBus.emit({ type: CHART_EVENT_TYPE.CLICK, data: { d, element } })
+          this.popupsUpdated.emit(this.popupsStoreService.popups)
+        },
       },
       zoom: {
         enabled: true,
         rescale: true,
         onzoom: (domain: Domain) => {
           this.onZoom(domain)
+          this.eventBus.emit({ type: CHART_EVENT_TYPE.ZOOM })
         },
         onzoomstart: () => {
           this.onZoomStart()
@@ -165,7 +192,6 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
     super.ngAfterViewInit()
     this.selectPoints(this.selectedPoints)
     this.customizePoints(this.customPoints)
-    console.timeEnd('chart')
   }
 
   override ngOnChanges(changes: SimpleChanges): void {

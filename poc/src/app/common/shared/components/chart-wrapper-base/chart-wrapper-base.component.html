@@ -1,1 +1,4 @@
-<div #chart class="chart"></div>
+<div id="chartWrapper">
+  <lw-chart-popups [chart]="chartRef" [chartId]="chartId" [type]="type" [eventBus]="eventBus"></lw-chart-popups>
+  <div #chart class="chart"></div>
+</div>

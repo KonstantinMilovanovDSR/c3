@@ -1,6 +1,10 @@
 import { ChartInternal } from './core';
 
 ChartInternal.prototype.getClipPath = function (id) {
+    var $$ = this;
+    if ($$.config.svg_relativeClipPath) {
+        return "url(#" + id + ")";
+    }
     var isIE9 = window.navigator.appVersion.toLowerCase().indexOf("msie 9.") >= 0;
     return "url(" + (isIE9 ? "" : document.URL.split('#')[0]) + "#" + id + ")";
 };

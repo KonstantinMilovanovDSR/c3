@@ -34,6 +34,7 @@ import { ResizeVHandleComponent } from '@src/app/common/shared/components/resize
 })
 export class ChartPanelComponent extends SubscriptionHandler implements OnInit, OnDestroy {
   @Input() data: ChartPanelData
+  @Input() chartId: string | number
   @Input() eventBus: EventEmitter<ChartPanelEvent>
   @Input() scrollContainer: HTMLElement
   @Input() resizeHandle: ResizeVHandleComponent
