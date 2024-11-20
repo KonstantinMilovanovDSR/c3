@@ -18,11 +18,13 @@ import {
   CustomPointsHandler,
   GridLine,
   SelectedPoint,
+  TEMP_CHART_NAME,
 } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper.types'
 import { LineChartWrapperComponent } from '@src/app/common/shared/components/line-chart-wrapper/line-chart-wrapper.component'
 import {
   generateCustomPoints,
   generateDataset,
+  generateId,
   generateSelectedPoints,
   getMaxLengthOfElementsAndGetDifferences,
 } from '@src/app/common/utils/helpers'
@@ -32,10 +34,11 @@ import { customPointsHandler } from '@src/app/common/utils/custom-points.helper'
 import { DEBOUNCE_TIME_SMALL } from '@src/app/common/constants/constants'
 import { debounceTime, fromEvent } from 'rxjs'
 import * as htmlToImage from 'html-to-image'
+import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
 
 interface ChartInfo {
   dataSet: number[]
-  popups: any[]
+  chartId: string
 }
 
 @Component({
@@ -46,6 +49,7 @@ interface ChartInfo {
 })
 export class VerticalLineSyncSandboxComponent implements OnInit {
   readonly POPUP_HEIGHT = 175
+
   pCount = 100
 
   minY: number[] = [10, 10]
@@ -87,7 +91,10 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
   @ViewChild('chartsContainer', { read: ElementRef }) chartsContainer: ElementRef<HTMLDivElement>
   @ViewChild('dynamicChartsContainer', { read: ViewContainerRef }) dynamicChartsContainer: ViewContainerRef
 
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {
+  constructor(
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private popupsStoreService: PopupsStoreService
+  ) {
     fromEvent(window, 'resize')
       .pipe(debounceTime(DEBOUNCE_TIME_SMALL))
       .subscribe(() => {
@@ -99,7 +106,7 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
     for (let i = 0; i < 2; i++) {
       this.chartInfos.push({
         dataSet: this.dataSetUpdate(this.minY[i], this.maxY[i]),
-        popups: [],
+        chartId: `chart_${generateId()}`,
       })
     }
     this.maxDataSetValueLengths = getMaxLengthOfElementsAndGetDifferences(this.dataSets[0], this.dataSets[1])
@@ -134,14 +141,9 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
     )
   }
 
-  updatePopups(index: number, popups: any) {
-    const popupsArr = Object.values<any>(popups)
-    this.chartInfos[index].popups = popupsArr[index]
-  }
-
-  calcImageSize(index: number, chartRect: DOMRect) {
+  calcImageSize(chartId: string, chartRect: DOMRect) {
     let maxY = 0
-    this.chartInfos[index].popups.forEach((item) => {
+    this.popupsStoreService.popups[chartId].forEach((item) => {
       if (item.y > maxY) {
         maxY = item.y
       }
@@ -154,6 +156,9 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
       console.time('chart' + i)
       const component = this.dynamicChartsContainer.createComponent(LineChartWrapperComponent)
 
+      this.popupsStoreService.popups[TEMP_CHART_NAME] = this.popupsStoreService.popups[this.chartInfos[i].chartId]
+
+      component.instance.chartId = TEMP_CHART_NAME
       component.instance.dataSet = this.chartInfos[i].dataSet
       component.instance.size = this.chartSize
       component.instance.hideXTicks = true
@@ -164,24 +169,24 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
       component.instance.selectedPoints = this.selectedPoints
       component.instance.initialDomain = this.currentDomain
       component.instance.relativeClipPath = true
-      component.instance.popups = this.chartInfos[i].popups
-      component.instance.customViewContainerRef = this.dynamicChartsContainer
       component.instance.useSelection = true
 
       const element: HTMLElement = component.location.nativeElement
       element.style.setProperty('width', `${this.chartSize.width}px`)
       element.style.setProperty('height', `${this.chartSize.height}px`)
-      await this.exportToSvg(i, element)
+      await this.exportToSvg(TEMP_CHART_NAME, element)
       component.destroy()
       console.timeEnd('chart' + i)
     }
+
+    delete this.popupsStoreService.popups[TEMP_CHART_NAME]
   }
 
-  async exportToSvg(index: number, el: HTMLElement) {
+  async exportToSvg(chartId: string, el: HTMLElement) {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
     const fontEmbedCSS = await htmlToImage.getFontEmbedCSS(el)
-    const { width, height } = this.calcImageSize(index, el.getBoundingClientRect())
+    const { width, height } = this.calcImageSize(chartId, el.getBoundingClientRect())
     canvas.width = width
     canvas.height = height
 

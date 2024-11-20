@@ -67,7 +67,6 @@ export class ChartPopupsComponent extends SubscriptionHandler implements OnInit 
       chartId: this.chartId,
       updatePopup: this.helperService.updatePopup,
       xBarClass: this.helperService.xBarClass,
-      popups: [],
     })
   }
 

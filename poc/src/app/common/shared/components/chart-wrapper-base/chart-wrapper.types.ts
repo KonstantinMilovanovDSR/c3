@@ -58,3 +58,5 @@ export type ChartPoint = {
   x: number
   y: number
 }
+
+export const TEMP_CHART_NAME = 'TEMP'

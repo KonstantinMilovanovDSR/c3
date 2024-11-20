@@ -42,10 +42,6 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
   @Input() customPoints: CustomPoint[] = []
   @Input() customPointsHandler: CustomPointsHandler
   @Input() maxDataSetValueLength: number
-  @Input() popups: any[]
-  @Input() customViewContainerRef: ViewContainerRef
-
-  @Output() popupsUpdated = new EventEmitter()
 
   customPointsMap: Record<number, CustomPoint> = {}
 
@@ -76,7 +72,6 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
         },
         onclick: (d, element) => {
           this.eventBus.emit({ type: CHART_EVENT_TYPE.CLICK, data: { d, element } })
-          this.popupsUpdated.emit(this.popupsStoreService.popups)
         },
       },
       zoom: {

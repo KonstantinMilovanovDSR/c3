@@ -1,4 +1,5 @@
 import { ComponentRef, ElementRef, EmbeddedViewRef, Injectable } from '@angular/core'
+import { TEMP_CHART_NAME } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper.types'
 import { PopupComponent } from '@src/app/common/shared/components/popup/popup.component'
 import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
 import { throttleTime } from '@src/app/common/utils/helpers'
@@ -23,23 +24,27 @@ export class ChartPopupsService {
   updatePopup: ({ popup, bbox, barsWidth, eventRectWidth, popupWidth }) => void
 
   updateWidths(): void {
-    this.popupWidth = (this.popupShadow.hostView as EmbeddedViewRef<any>).rootNodes[0].getBoundingClientRect().width
+    if (this.popupShadow) {
+      this.popupWidth = (this.popupShadow.hostView as EmbeddedViewRef<any>).rootNodes[0].getBoundingClientRect().width
+    }
     this.xBarWidth = this.chart.nativeElement.querySelector(this.xBarClass).getBoundingClientRect().width
     this.chartWidth = this.chart.nativeElement.getBoundingClientRect().width
   }
 
-  init({ viewContainerRef, chart, updatePopup, popupsStoreService, chartId, xBarClass, popups }): void {
-    this.popupShadow = viewContainerRef.createComponent(PopupComponent)
+  init({ viewContainerRef, chart, updatePopup, popupsStoreService, chartId, xBarClass }): void {
+    this.popupShadow = chartId !== TEMP_CHART_NAME ? viewContainerRef.createComponent(PopupComponent) : null
     this.chart = chart
     this.chartId = chartId
     this.updatePopup = updatePopup
     this.popupsStoreService = popupsStoreService
     this.xBarClass = xBarClass
     if (!this.popupsStoreService.popups[this.chartId]) {
-      this.popupsStoreService.popups[this.chartId] = popups || []
+      this.popupsStoreService.popups[this.chartId] = []
     }
-    const popupShadowEl = (this.popupShadow.hostView as EmbeddedViewRef<any>).rootNodes[0]
-    popupShadowEl.style.zIndex = -1
+    if (this.popupShadow) {
+      const popupShadowEl = (this.popupShadow.hostView as EmbeddedViewRef<any>).rootNodes[0]
+      popupShadowEl.style.zIndex = -1
+    }
   }
 
   afterViewInit(selector: string): void {
