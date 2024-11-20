@@ -112,3 +112,21 @@ export function generateCustomPoints(pointsCount: number): CustomPoint[] {
     .fill(0)
     .map(() => ({ index: getRandomInt(0, pointsCount - 1), tag: tags[getRandomInt(0, 3)] }))
 }
+
+export function throttleTime<T extends unknown[]>(callback: (...args: T) => unknown, delay = 100) {
+  let shouldWait = false
+  let lastArgs: Parameters<typeof callback>
+
+  return (...args: Parameters<typeof callback>) => {
+    lastArgs = args
+    if (shouldWait) {
+      return
+    }
+
+    shouldWait = true
+    setTimeout(() => {
+      callback(...lastArgs)
+      shouldWait = false
+    }, delay)
+  }
+}

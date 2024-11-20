@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ComponentRef,
   EmbeddedViewRef,
@@ -11,7 +12,7 @@ import {
   ViewContainerRef,
 } from '@angular/core'
 import { DataPoint, Domain, PrimitiveArray } from 'c3'
-import { arrayToObject, getNeededSpaces } from '@src/app/common/utils/helpers'
+import { arrayToObject, getNeededSpaces, throttleTime } from '@src/app/common/utils/helpers'
 import { ChartWrapperBaseComponent } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.component'
 import {
   CustomPoint,
@@ -26,6 +27,7 @@ import {
   TOP_LIMIT_DATA_SET,
 } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.consts'
 import { PopupComponent } from '@src/app/common/shared/components/popup/popup.component'
+import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
 
 @Component({
   selector: 'lw-line-chart-wrapper',
@@ -45,26 +47,49 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
 
   customPointsMap: Record<number, CustomPoint> = {}
 
-  constructor(private viewContainerRef: ViewContainerRef) {
-    super()
+  constructor(
+    private viewContainerRef: ViewContainerRef,
+    private changeDetectorRef: ChangeDetectorRef,
+    popupsStoreService: PopupsStoreService
+  ) {
+    super(popupsStoreService)
     console.time('chart')
   }
+  updatePopupsThrottle = throttleTime(() => this.updatePopupsProps(), 5)
 
   override ngOnInit(): void {
     super.ngOnInit()
     this.popupShadow = this.viewContainerRef.createComponent(PopupComponent)
     const popupShadowEl = (this.popupShadow.hostView as EmbeddedViewRef<any>).rootNodes[0]
     popupShadowEl.style.zIndex = -1
-    console.log(popupShadowEl.getBoundingClientRect().height)
+  }
+
+  popupWidth = 0
+  xBarWidth = 0
+  chartWidth = 0
+
+  OFFSET_LEFT = -3
+  OFFSET_RIGHT = 5
+  OFFSET_TOP = 10
+
+  private updateWidths(): void {
+    this.popupWidth = (this.popupShadow.hostView as EmbeddedViewRef<any>).rootNodes[0].getBoundingClientRect().width
+    this.xBarWidth = this.chart.nativeElement.querySelector('.c3-grid.c3-grid-lines').getBoundingClientRect().width
+    this.chartWidth = this.chart.nativeElement.getBoundingClientRect().width
   }
 
   private updatePopupsProps(): void {
-    console.log(this.popups.map((pp) => pp.element.getBBox()))
-    const barsWidth = this.chart.nativeElement.querySelector('.c3-axis.c3-axis-y')?.getBoundingClientRect().width
-    this.popups.forEach((popup) => {
+    const eventRectWidth = this.chart.nativeElement.querySelector('.c3-event-rect').getBoundingClientRect().width
+    const barsWidth = this.chartWidth - this.xBarWidth
+    this.popupsStoreService.popups[this.chartId].forEach((popup) => {
       const bbox = popup.element.getBBox()
-      popup.x = bbox.x + barsWidth
-      popup.y = bbox.y
+      const popupX =
+        bbox.x + barsWidth + this.popupWidth <= eventRectWidth
+          ? bbox.x + barsWidth + this.OFFSET_RIGHT
+          : bbox.x + barsWidth - this.popupWidth - this.OFFSET_LEFT
+      popup.x = popupX
+      popup.y = bbox.y + this.OFFSET_TOP
+      popup.show = bbox.x >= -5 && bbox.x <= eventRectWidth
     })
   }
 
@@ -81,20 +106,28 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
           enabled: this.useSelection,
         },
         onclick: (d, element) => {
-          const barsWidth = this.chart.nativeElement.querySelector('.c3-axis.c3-axis-y')?.getBoundingClientRect().width
+          if (this.popupsStoreService.popups[this.chartId].find((popup) => popup.index === d.index)) {
+            return
+          }
+          this.updateWidths()
+          const eventRectWidth = this.chart.nativeElement.querySelector('.c3-event-rect').getBoundingClientRect().width
           const bbox = element.getBBox()
-          // console.log(d, element, barsWidth, bbox, this.chart.nativeElement, this.chart.nativeElement.querySelector('.chart.c3'))
-          // console.log(`translate(${bbox.x + barsWidth}px, ${bbox.y - this.height}px)`)
-          this.popups.push({ x: bbox.x + barsWidth, y: bbox.y, point: d, element })
-          // console.log(this.instance.data())
+          const barsWidth = this.chartWidth - this.xBarWidth
+          const popupX =
+            bbox.x + barsWidth + this.popupWidth <= eventRectWidth
+              ? bbox.x + barsWidth + this.OFFSET_RIGHT
+              : bbox.x + barsWidth - this.popupWidth - this.OFFSET_LEFT
+          this.popupsStoreService.popups[this.chartId].push({
+            x: popupX,
+            y: bbox.y + this.OFFSET_TOP,
+            point: d,
+            element,
+            show: bbox.x >= -5 && bbox.x <= eventRectWidth,
+            index: d.index,
+            data: d.value,
+          })
           this.showPopups = true
-        },
-        ondragstart: () => {
-          this.showPopups = false
-        },
-        ondragend: () => {
-          this.showPopups = true
-          this.updatePopupsProps()
+          this.changeDetectorRef.markForCheck()
         },
       },
       zoom: {
@@ -102,16 +135,13 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
         rescale: true,
         onzoom: (domain: Domain) => {
           this.onZoom(domain)
+          this.updatePopupsThrottle()
         },
         onzoomstart: () => {
           this.onZoomStart()
-          this.showPopups = false
         },
         onzoomend: (domain: Domain) => {
-          console.log(domain)
           this.onZoomEnd(domain)
-          this.showPopups = true
-          this.updatePopupsProps()
         },
       },
       legend: {
@@ -213,7 +243,10 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
     super.ngAfterViewInit()
     this.selectPoints(this.selectedPoints)
     this.customizePoints(this.customPoints)
-    console.timeEnd('chart')
+    this.popupsStoreService.popups[this.chartId].forEach((popup) => {
+      popup.element = this.chart.nativeElement.querySelector('.c3-circle-' + popup.index)
+    })
+    this.updateWidths()
   }
 
   override ngOnChanges(changes: SimpleChanges): void {

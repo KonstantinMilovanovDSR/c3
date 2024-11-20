@@ -13,6 +13,7 @@ import { IntersectionObserverDirective } from '@src/app/common/shared/directives
 import { IntersectionRootDirective } from '@src/app/common/shared/directives/intersection-observer/intersection-root.directive'
 import { IntersectionObserveeDirective } from '@src/app/common/shared/directives/intersection-observer/intersection-observee.directive'
 import { PopupComponent } from '@src/app/common/shared/components/popup/popup.component'
+import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
 
 @NgModule({
   declarations: [
@@ -41,6 +42,6 @@ import { PopupComponent } from '@src/app/common/shared/components/popup/popup.co
     IntersectionRootDirective,
     PurePipeCreator,
   ],
-  providers: [],
+  providers: [PopupsStoreService],
 })
 export class SharedModule {}

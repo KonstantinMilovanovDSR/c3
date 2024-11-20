@@ -21,6 +21,7 @@ import { customPointsHandler } from '@src/app/common/utils/custom-points.helper'
 import { DEBOUNCE_TIME_SMALL } from '@src/app/common/constants/constants'
 import { debounceTime, fromEvent } from 'rxjs'
 import * as htmlToImage from 'html-to-image'
+import * as domToImage from 'dom-to-image'
 
 @Component({
   selector: 'lw-vertical-line-sync-sandbox',
@@ -71,6 +72,16 @@ export class VerticalLineSyncSandboxComponent {
       const fontEmbedCSS = await htmlToImage.getFontEmbedCSS(el)
       htmlToImage
         .toSvg(el, { fontEmbedCSS })
+        .then(function (dataUrl) {
+          const img = new Image()
+          img.src = dataUrl
+          document.body.appendChild(img)
+        })
+        .catch(function (error) {
+          console.error('oops, something went wrong!', error)
+        })
+      domToImage
+        .toSvg(el)
         .then(function (dataUrl) {
           const img = new Image()
           img.src = dataUrl

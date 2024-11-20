@@ -26,10 +26,11 @@ import {
 } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.consts'
 import c3 from '@src/app/c3/src/index.js'
 import * as d3 from 'd3'
+import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
 
 @Component({ template: '' })
 export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
-  @Input() chartId = `chart_${generateId()}`
+  @Input() chartId: string | number = `chart_${generateId()}`
   @Input() size: ChartSize
   @Input() xAxisMaxLength = X_AXIS_MAX_LENGTH_DEFAULT
   @Input() isDomainCorrect: CheckDomainPredicate
@@ -55,6 +56,8 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
   height = 420
   popups = []
   showPopups = true
+
+  constructor(protected popupsStoreService: PopupsStoreService) {}
 
   protected instance!: any
 
@@ -87,13 +90,15 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
       params.grid.x.lines = params.grid.x.lines || this.xGridLines
     }
     setTimeout(() => (this.height = this.chart.nativeElement?.getBoundingClientRect().height))
-    console.log(this.chart, this.height)
   }
 
   protected abstract getParams(): any
 
   ngOnInit(): void {
     this.updateParams()
+    if (!this.popupsStoreService.popups[this.chartId]) {
+      this.popupsStoreService.popups[this.chartId] = []
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
