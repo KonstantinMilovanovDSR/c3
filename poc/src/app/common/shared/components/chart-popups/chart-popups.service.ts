@@ -4,7 +4,7 @@ import { PopupsStoreService } from '@src/app/common/shared/services/popups-store
 import { throttleTime } from '@src/app/common/utils/helpers'
 
 @Injectable()
-export class ChartWrapperPopupsService {
+export class ChartPopupsService {
   chartId: string | number
   chart: ElementRef
   popupShadow: ComponentRef<PopupComponent>
@@ -56,7 +56,7 @@ export class ChartWrapperPopupsService {
     })
   }
 
-  onPointClick(d, element, createPopup: ({ bbox, barsWidth, eventRectWidth, popupWidth, removeCallback }) => any): void {
+  onPointClick(d, element, createPopup: ({ d, element, bbox, barsWidth, eventRectWidth, popupWidth, removeCallback }) => any): void {
     if (this.popupsStoreService.popups[this.chartId].find((popup) => popup.index === d.index)) {
       return
     }
@@ -71,6 +71,8 @@ export class ChartWrapperPopupsService {
     }
     this.popupsStoreService.popups[this.chartId].push(
       createPopup({
+        d,
+        element,
         bbox,
         barsWidth,
         eventRectWidth,
