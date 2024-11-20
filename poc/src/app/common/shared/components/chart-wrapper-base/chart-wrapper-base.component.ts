@@ -41,6 +41,8 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
   @Input() yGridLinesTopLimitEnabled = false
   @Input() xGridLines: GridLine[] = []
   @Input() hideXTicks = false
+  @Input() popups: any[] = []
+  @Input() relativeClipPath: boolean
 
   @Output() showXGridFocus = new EventEmitter<DataPoint>()
   @Output() hideXGridFocus = new EventEmitter<void>()
@@ -53,7 +55,6 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
   @ViewChild('chart', { static: true }) chart!: ElementRef
 
   height = 420
-  popups = []
   showPopups = true
 
   protected instance!: any

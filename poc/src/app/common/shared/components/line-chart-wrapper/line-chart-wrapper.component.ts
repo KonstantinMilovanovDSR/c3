@@ -4,9 +4,11 @@ import {
   Component,
   ComponentRef,
   EmbeddedViewRef,
+  EventEmitter,
   Input,
   OnChanges,
   OnInit,
+  Output,
   SimpleChanges,
   ViewContainerRef,
 } from '@angular/core'
@@ -41,6 +43,8 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
   @Input() customPointsHandler: CustomPointsHandler
   @Input() maxDataSetValueLength: number
 
+  @Output() popupsUpdated = new EventEmitter()
+
   popupShadow: ComponentRef<PopupComponent>
 
   customPointsMap: Record<number, CustomPoint> = {}
@@ -72,6 +76,9 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
     return {
       bindto: `#${this.chartId}`,
       size: this.size,
+      svg: {
+        relativeClipPath: this.relativeClipPath
+      },
       data: {
         columns: [[MAIN_DATA_SET, ...this.dataSet]],
         types: {
@@ -88,6 +95,7 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
           this.popups.push({ x: bbox.x + barsWidth, y: bbox.y, point: d, element })
           // console.log(this.instance.data())
           this.showPopups = true
+          this.popupsUpdated.emit(this.popups)
         },
         ondragstart: () => {
           this.showPopups = false

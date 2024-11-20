@@ -7,7 +7,7 @@
     <button class="input-container__button mat-button mat-raised-button" (click)="clearCustomPoints()">Clear custom points</button>
     <button class="input-container__button mat-button mat-raised-button" (click)="addSelectedPoints()">Select points</button>
     <button class="input-container__button mat-button mat-raised-button" (click)="clearSelectedPoints()">Clear selection</button>
-    <button class="input-container__button mat-button mat-raised-button" (click)="exportToSvg()">Export to SVG</button>
+    <button class="input-container__button mat-button mat-raised-button" (click)="createHTML()">Export to SVG</button>
     <div class="vertical-line-sync-sandbox__row">
       <label class="row__label">minY1</label>
       <div class="row__value"><lw-number-input [minValue]="1" [(ngModel)]="minY1" (ngModelChange)="updateY1Range()"></lw-number-input></div>
@@ -59,6 +59,7 @@
         (zoomEnd)="onZoomEndTop($event)"
         [formatX]="formatX"
         [formatY]="formatY"
+        (popupsUpdated)="updatePopups($event)"
         #chartWrapperTop
       ></lw-line-chart-wrapper>
     </div>
@@ -88,3 +89,4 @@
     </div>
   </div>
 </div>
+<div #dynamicChartsContainer></div>

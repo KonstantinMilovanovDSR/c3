@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core'
+import {
+  ApplicationRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ComponentFactoryResolver,
+  ElementRef,
+  EmbeddedViewRef,
+  ViewChild,
+  ViewContainerRef,
+} from '@angular/core'
 import {
   ChartSize,
   CheckDomainPredicate,
@@ -21,6 +31,7 @@ import { customPointsHandler } from '@src/app/common/utils/custom-points.helper'
 import { DEBOUNCE_TIME_SMALL } from '@src/app/common/constants/constants'
 import { debounceTime, fromEvent } from 'rxjs'
 import * as htmlToImage from 'html-to-image'
+import domtoimage from 'dom-to-image';
 
 @Component({
   selector: 'lw-vertical-line-sync-sandbox',
@@ -65,21 +76,66 @@ export class VerticalLineSyncSandboxComponent {
       ...(this.yGridLinesTopLimitEnabled ? this.dataSetsWithTopLimit : this.dataSets)
     )
   }
-  exportToSvg(): void {
-    setTimeout(async () => {
-      const el = document.getElementById('chartWrapper')
-      const fontEmbedCSS = await htmlToImage.getFontEmbedCSS(el)
-      htmlToImage
-        .toSvg(el, { fontEmbedCSS })
-        .then(function (dataUrl) {
-          const img = new Image()
-          img.src = dataUrl
-          document.body.appendChild(img)
+
+  popups = []
+
+  updatePopups(popups: any) {
+    this.popups = popups
+  }
+
+  calcImageSize(chartRect: DOMRect) {
+    let maxY = 0
+    this.popups.forEach((item) => {
+      if (item.y > maxY) {
+        maxY = item.y
+      }
+    })
+    return { width: chartRect.width, height: Math.max(chartRect.height, maxY + 150) }
+  }
+
+  async createHTML() {
+    for (let i = 0; i < 1; i++) {
+      const component = this.dynamicChartsContainer.createComponent(LineChartWrapperComponent)
+      component.instance.dataSet = this.dataSetTop
+      component.instance.size = this.chartSize
+      component.instance.hideXTicks = true
+      component.instance.yGridLines = this.yGridLines
+      component.instance.yGridLinesTopLimitEnabled = this.yGridLinesTopLimitEnabled
+      component.instance.customPoints = this.customPoints
+      component.instance.popups = this.popups
+      component.instance.initialDomain = this.currentDomain
+      component.instance.relativeClipPath = true
+      const element: HTMLElement = component.location.nativeElement
+      element.style.setProperty('width', `${this.chartSize.width}px`)
+      element.style.setProperty('height', `${this.chartSize.height}px`)
+      await this.exportToSvg(element)
+      component.destroy()
+    }
+  }
+
+  async exportToSvg(el: HTMLElement) {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    const fontEmbedCSS = await htmlToImage.getFontEmbedCSS(el)
+    const { width, height } = this.calcImageSize(el.getBoundingClientRect())
+    canvas.width = width
+    canvas.height = height
+
+    return htmlToImage
+      .toSvg(el, { fontEmbedCSS,  width, height })
+      .then(function (dataUrl) {
+        const img = new Image()
+        img.addEventListener('load', (e: any) => {
+          ctx.drawImage(e.target, 0, 0)
+          //img.src = canvas.toDataURL();
         })
-        .catch(function (error) {
-          console.error('oops, something went wrong!', error)
-        })
-    }, 100)
+        img.src = dataUrl
+        document.body.appendChild(canvas)
+        //document.body.appendChild(img)
+      })
+      .catch(function (error) {
+        console.error('oops, something went wrong!', error)
+      })
   }
 
   dataSetTop: number[] = this.dataSetUpdate(this.minY1, this.maxY1)
@@ -141,12 +197,17 @@ export class VerticalLineSyncSandboxComponent {
   customPoints: CustomPoint[] = []
 
   customPointsHandler = customPointsHandler
+  currentDomain: Domain
 
   @ViewChild('chartWrapperTop', { read: LineChartWrapperComponent }) chartWrapperTop: LineChartWrapperComponent
   @ViewChild('chartWrapperBottom', { read: LineChartWrapperComponent }) chartWrapperBottom: LineChartWrapperComponent
   @ViewChild('chartsContainer', { read: ElementRef }) chartsContainer: ElementRef<HTMLDivElement>
+  @ViewChild('dynamicChartsContainer', { read: ViewContainerRef }) dynamicChartsContainer: ViewContainerRef
 
-  constructor(private readonly changeDetectorRef: ChangeDetectorRef) {
+  constructor(
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private appRef: ApplicationRef
+  ) {
     fromEvent(window, 'resize')
       .pipe(debounceTime(DEBOUNCE_TIME_SMALL))
       .subscribe(() => {
@@ -187,6 +248,7 @@ export class VerticalLineSyncSandboxComponent {
   }
 
   onZoomTop(domain: Domain): void {
+    this.currentDomain = domain
     if (this.masterChart === this.chartWrapperTop) {
       this.zoomChart(this.chartWrapperBottom, domain)
     }
