@@ -26,10 +26,9 @@ import {
 } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.consts'
 import c3 from '@src/app/c3/src/index.js'
 import * as d3 from 'd3'
-import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
-import { ChartWrapperPopupsService } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-popups.service'
+import { CHART_EVENT_TYPE, CHART_TYPE, ChartEvent } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.types'
 
-@Component({ template: '', providers: [ChartWrapperPopupsService] })
+@Component({ template: '' })
 export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   @Input() chartId: string | number = `chart_${generateId()}`
   @Input() size: ChartSize
@@ -54,14 +53,11 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
 
   @ViewChild('chart', { static: true }) chart!: ElementRef
 
+  eventBus = new EventEmitter<ChartEvent>()
+
+  abstract type: CHART_TYPE
+
   height = 420
-
-  abstract updatePopup: (popup, b, w: number, e: number, p: number) => void
-
-  constructor(
-    protected popupsStoreService: PopupsStoreService,
-    protected chartWrapperPopupsService: ChartWrapperPopupsService
-  ) {}
 
   protected instance!: any
 
@@ -123,6 +119,7 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
     this.setInitialZoom()
     this.initComplete = true
     this.afterInit.emit()
+    this.eventBus.emit({ type: CHART_EVENT_TYPE.AFTER_INIT })
   }
 
   ngOnDestroy(): void {

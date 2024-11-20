@@ -7,7 +7,6 @@ import {
   OnChanges,
   OnInit,
   SimpleChanges,
-  ViewContainerRef,
 } from '@angular/core'
 import { DataPoint, Domain } from 'c3'
 import {
@@ -18,14 +17,12 @@ import {
 } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.consts'
 import { ChartWrapperBaseComponent } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.component'
 import { BarChartDataSet } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper.types'
-import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
-import { ChartWrapperPopupsService } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-popups.service'
+import { CHART_EVENT_TYPE, CHART_TYPE } from '@src/app/common/shared/components/chart-wrapper-base/chart-wrapper-base.types'
 
 @Component({
   selector: 'lw-bar-chart-wrapper',
   templateUrl: '../chart-wrapper-base/chart-wrapper-base.component.html',
   styleUrls: ['../chart-wrapper-base/chart-wrapper-base.component.less', './bar-chart-wrapper.component.less'],
-  providers: [ChartWrapperPopupsService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BarChartWrapperComponent extends ChartWrapperBaseComponent implements OnInit, AfterViewInit, OnChanges {
@@ -39,44 +36,16 @@ export class BarChartWrapperComponent extends ChartWrapperBaseComponent implemen
   private x2DataSet: number[] = []
   private chartPadding: number
 
+  type = CHART_TYPE.BAR
+
   override ngOnInit(): void {
     super.ngOnInit()
-    this.chartWrapperPopupsService.init({
-      viewContainerRef: this.viewContainerRef,
-      chart: this.chart,
-      popupsStoreService: this.popupsStoreService,
-      chartId: this.chartId,
-      updatePopup: this.updatePopup,
-      xBarClass: '.c3-event-rect',
-    })
   }
 
-  constructor(
-    private viewContainerRef: ViewContainerRef,
-    private changeDetectorRef: ChangeDetectorRef,
-    chartWrapperPopupsService: ChartWrapperPopupsService,
-    popupsStoreService: PopupsStoreService
-  ) {
-    super(popupsStoreService, chartWrapperPopupsService)
+  constructor(private changeDetectorRef: ChangeDetectorRef) {
+    super()
     console.time('chart')
   }
-
-  private calculatePopupX({ bbox, barsWidth, eventRectWidth, popupWidth }): number {
-    return bbox.x + barsWidth + popupWidth <= eventRectWidth - bbox.width / 2
-      ? bbox.x + barsWidth + bbox.width / 2 + this.POPUP_OFFSET_RIGHT
-      : bbox.x + barsWidth + bbox.width / 2 - popupWidth - this.POPUP_OFFSET_LEFT
-  }
-
-  updatePopup = ({ popup, bbox, barsWidth, eventRectWidth, popupWidth }): void => {
-    popup.x = this.calculatePopupX({ bbox, barsWidth, eventRectWidth, popupWidth })
-    popup.y = bbox.y + this.POPUP_OFFSET_TOP
-    popup.show = bbox.x >= this.POPUP_HIDE_GAP && bbox.x <= eventRectWidth - bbox.width / 2
-  }
-
-  POPUP_OFFSET_LEFT = -5
-  POPUP_OFFSET_RIGHT = 0
-  POPUP_OFFSET_TOP = 10
-  POPUP_HIDE_GAP = -5
 
   protected override getParams(): any {
     this.xDataSet = this.dataSet.map((item) => item.x)
@@ -110,19 +79,7 @@ export class BarChartWrapperComponent extends ChartWrapperBaseComponent implemen
           [NDC_DATA_SET]: 'spline',
         },
         onclick: (d, element) => {
-          const createPopup = ({ bbox, barsWidth, eventRectWidth, popupWidth, removeCallback }) => {
-            return {
-              x: this.calculatePopupX({ bbox, barsWidth, eventRectWidth, popupWidth }),
-              y: bbox.y + this.POPUP_OFFSET_TOP,
-              point: d,
-              element,
-              show: bbox.x >= this.POPUP_HIDE_GAP && bbox.x <= eventRectWidth,
-              index: d.index,
-              data: d.value,
-              clicked: removeCallback,
-            }
-          }
-          this.chartWrapperPopupsService.onPointClick(d, element, createPopup)
+          this.eventBus.emit({ type: CHART_EVENT_TYPE.CLICK, data: { d, element } })
           this.changeDetectorRef.markForCheck()
         },
       },
@@ -137,7 +94,7 @@ export class BarChartWrapperComponent extends ChartWrapperBaseComponent implemen
         rescale: true,
         onzoom: (domain: Domain) => {
           this.onZoom(domain)
-          this.chartWrapperPopupsService.updatePopupsThrottle()
+          this.eventBus.emit({ type: CHART_EVENT_TYPE.ZOOM })
         },
         onzoomstart: () => {
           this.onZoomStart()
@@ -203,7 +160,6 @@ export class BarChartWrapperComponent extends ChartWrapperBaseComponent implemen
   override ngAfterViewInit(): void {
     super.ngAfterViewInit()
     this.toggleNDC()
-    this.chartWrapperPopupsService.afterViewInit('.c3-bar-')
   }
 
   override ngOnChanges(changes: SimpleChanges): void {
