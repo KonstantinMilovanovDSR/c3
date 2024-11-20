@@ -1,10 +1,4 @@
 <div id="chartWrapper">
-  <div *ngIf="showPopups" style="position: relative">
-    <ng-container *ngFor="let popup of popupsStoreService.popups[chartId]">
-      <div [hidden]="!popup.show" style="position: absolute" [ngStyle]="{ 'left.px': popup.x, 'top.px': popup.y }">
-        <lw-popup [data]="popup.data"></lw-popup>
-      </div>
-    </ng-container>
-  </div>
+  <lw-chart-popups [chartWrapperPopupsService]="chartWrapperPopupsService"></lw-chart-popups>
   <div #chart class="chart"></div>
 </div>

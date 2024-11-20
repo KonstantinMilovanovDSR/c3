@@ -14,6 +14,7 @@ import { IntersectionRootDirective } from '@src/app/common/shared/directives/int
 import { IntersectionObserveeDirective } from '@src/app/common/shared/directives/intersection-observer/intersection-observee.directive'
 import { PopupComponent } from '@src/app/common/shared/components/popup/popup.component'
 import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
+import { ChartPopupsComponent } from '@src/app/common/shared/components/chart-popups/chart-popups.component'
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { PopupsStoreService } from '@src/app/common/shared/services/popups-store
     ChartPanelComponent,
     ResizeVHandleComponent,
     PopupComponent,
+    ChartPopupsComponent,
     ScrollDirectionDirective,
     IntersectionObserverDirective,
     IntersectionObserveeDirective,
