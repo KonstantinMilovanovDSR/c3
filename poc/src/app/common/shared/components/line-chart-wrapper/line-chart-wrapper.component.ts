@@ -51,10 +51,7 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
 
   type = CHART_TYPE.LINE
 
-  constructor(
-    private changeDetectorRef: ChangeDetectorRef,
-    public popupsStoreService: PopupsStoreService
-  ) {
+  constructor(public popupsStoreService: PopupsStoreService) {
     super()
     console.time('chart')
   }
@@ -79,7 +76,6 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
         },
         onclick: (d, element) => {
           this.eventBus.emit({ type: CHART_EVENT_TYPE.CLICK, data: { d, element } })
-          this.changeDetectorRef.markForCheck()
           this.popupsUpdated.emit(this.popupsStoreService.popups)
         },
       },

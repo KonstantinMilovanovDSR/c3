@@ -5,6 +5,8 @@ import { throttleTime } from '@src/app/common/utils/helpers'
 
 @Injectable()
 export class ChartPopupsService {
+  readonly THROTTLE_TIME = 50
+
   chartId: string | number
   chart: ElementRef
   popupShadow: ComponentRef<PopupComponent>
@@ -17,7 +19,7 @@ export class ChartPopupsService {
   xBarClass: string
 
   popupsStoreService: PopupsStoreService
-  updatePopupsThrottle = throttleTime(() => this.updatePopupsProps(), 5)
+  updatePopupsThrottle = throttleTime(() => this.updatePopupsProps(), this.THROTTLE_TIME)
   updatePopup: ({ popup, bbox, barsWidth, eventRectWidth, popupWidth }) => void
 
   updateWidths(): void {
