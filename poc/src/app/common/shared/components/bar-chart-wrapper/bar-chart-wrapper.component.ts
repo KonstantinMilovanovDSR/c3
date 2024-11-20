@@ -150,6 +150,7 @@ export class BarChartWrapperComponent extends ChartWrapperBaseComponent implemen
         width: {
           ratio: 0.99,
         },
+        syncScale: true,
       },
       zoom: {
         enabled: true,
