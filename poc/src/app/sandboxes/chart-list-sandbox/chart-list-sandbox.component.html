@@ -18,6 +18,7 @@
         (visible)="onVisibleChange(panel, $event)"
         (zoomEnd)="onZoomEnd(panel, $event)"
         [data]="panel"
+        [chartId]="panel.id"
         [eventBus]="eventBus"
         [resizeHandle]="resizeHandle"
         [scrollContainer]="chartList"

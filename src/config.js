@@ -268,6 +268,7 @@ ChartInternal.prototype.getDefaultConfig = function () {
         bar_width_max: undefined,
         bar_zerobased: true,
         bar_space: 0,
+        bar_syncScale: undefined,
         // area
         area_zerobased: true,
         area_above: false,

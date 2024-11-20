@@ -55,7 +55,7 @@ export class ChartListSandboxComponent extends SubscriptionHandler implements On
       const rndVal = getRandomInt(0, 100)
       if (rndVal >= 0 && rndVal < 50) {
         return {
-          id: idx,
+          id: 'chart-' + idx,
           panelHeight: this.getInitialChartPanelHeight(),
           disabled: false,
           dataSet: generateDataset(this.minVal, this.maxVal, this.pCount),
@@ -68,7 +68,7 @@ export class ChartListSandboxComponent extends SubscriptionHandler implements On
       } else {
         const barConfig = this.getBarConfig()
         return {
-          id: idx,
+          id: 'chart-' + idx,
           panelHeight: this.getInitialChartPanelHeight(),
           disabled: false,
           dataSet: barConfig.dataSet,

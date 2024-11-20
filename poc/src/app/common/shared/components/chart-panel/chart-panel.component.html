@@ -24,6 +24,7 @@
     [initialDomain]="data.domain"
     (zoomEnd)="zoomEnd.emit($event)"
     (afterInit)="chartInitFinished.emit(data)"
+    [chartId]="chartId"
   ></lw-line-chart-wrapper>
   <lw-bar-chart-wrapper
     *ngIf="isVisible && data.chartType === ChartWrapperType.BAR"
@@ -34,6 +35,7 @@
     [initialDomain]="data.domain"
     (zoomEnd)="zoomEnd.emit($event)"
     (afterInit)="chartInitFinished.emit(data)"
+    [chartId]="chartId"
   ></lw-bar-chart-wrapper>
   <div class="resize-handle resize-handle--bottom" mwlResizeHandle [resizeEdges]="{ bottom: true }"></div>
 </div>

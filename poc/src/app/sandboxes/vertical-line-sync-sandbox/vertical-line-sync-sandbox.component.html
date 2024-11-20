@@ -10,19 +10,27 @@
     <button class="input-container__button mat-button mat-raised-button" (click)="createHTML()">Export to SVG</button>
     <div class="vertical-line-sync-sandbox__row">
       <label class="row__label">minY1</label>
-      <div class="row__value"><lw-number-input [minValue]="1" [(ngModel)]="minY1" (ngModelChange)="updateY1Range()"></lw-number-input></div>
+      <div class="row__value">
+        <lw-number-input [minValue]="1" [(ngModel)]="minY[0]" (ngModelChange)="updateY1Range()"></lw-number-input>
+      </div>
     </div>
     <div class="vertical-line-sync-sandbox__row">
       <label class="row__label">maxY1</label>
-      <div class="row__value"><lw-number-input [minValue]="1" [(ngModel)]="maxY1" (ngModelChange)="updateY1Range()"></lw-number-input></div>
+      <div class="row__value">
+        <lw-number-input [minValue]="1" [(ngModel)]="maxY[0]" (ngModelChange)="updateY1Range()"></lw-number-input>
+      </div>
     </div>
     <div class="vertical-line-sync-sandbox__row">
       <label class="row__label">minY2</label>
-      <div class="row__value"><lw-number-input [minValue]="1" [(ngModel)]="minY2" (ngModelChange)="updateY2Range()"></lw-number-input></div>
+      <div class="row__value">
+        <lw-number-input [minValue]="1" [(ngModel)]="minY[1]" (ngModelChange)="updateY2Range()"></lw-number-input>
+      </div>
     </div>
     <div class="vertical-line-sync-sandbox__row">
       <label class="row__label">maxY2</label>
-      <div class="row__value"><lw-number-input [minValue]="1" [(ngModel)]="maxY2" (ngModelChange)="updateY2Range()"></lw-number-input></div>
+      <div class="row__value">
+        <lw-number-input [minValue]="1" [(ngModel)]="maxY[1]" (ngModelChange)="updateY2Range()"></lw-number-input>
+      </div>
     </div>
     <div class="vertical-line-sync-sandbox__row">
       <label class="row__label">Top limit</label>
@@ -41,7 +49,7 @@
     <div class="vertical-line-sync-sandbox__chart-content chart-content">
       <lw-line-chart-wrapper
         chartId="chartTop"
-        [dataSet]="dataSetTop"
+        [dataSet]="chartInfos[0].dataSet"
         [size]="chartSize"
         [hideXTicks]="true"
         [yGridLines]="yGridLines"
@@ -59,14 +67,14 @@
         (zoomEnd)="onZoomEndTop($event)"
         [formatX]="formatX"
         [formatY]="formatY"
-        (popupsUpdated)="updatePopups($event)"
+        (popupsUpdated)="updatePopups(0, $event)"
         #chartWrapperTop
       ></lw-line-chart-wrapper>
     </div>
     <div class="vertical-line-sync-sandbox__chart-content chart-content">
       <lw-line-chart-wrapper
         chartId="chartBottom"
-        [dataSet]="dataSetBottom"
+        [dataSet]="chartInfos[1].dataSet"
         [size]="chartSize"
         [yGridLines]="yGridLines"
         [yGridLinesTopLimitEnabled]="yGridLinesTopLimitEnabled"
@@ -84,6 +92,7 @@
         (zoomEnd)="onZoomEndBottom($event)"
         [formatX]="formatX"
         [formatY]="formatY"
+        (popupsUpdated)="updatePopups(1, $event)"
         #chartWrapperBottom
       ></lw-line-chart-wrapper>
     </div>
