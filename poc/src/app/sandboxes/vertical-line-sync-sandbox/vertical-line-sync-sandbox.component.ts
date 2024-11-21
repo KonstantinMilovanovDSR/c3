@@ -35,6 +35,7 @@ import { DEBOUNCE_TIME_SMALL } from '@src/app/common/constants/constants'
 import { debounceTime, fromEvent } from 'rxjs'
 import * as htmlToImage from 'html-to-image'
 import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
+import { PrintHelper } from '@src/app/common/utils/print-helper'
 
 interface ChartInfo {
   dataSet: number[]
@@ -85,6 +86,8 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
 
   customPointsHandler = customPointsHandler
   currentDomain: Domain
+
+  printHelper = new PrintHelper()
 
   @ViewChild('chartWrapperTop', { read: LineChartWrapperComponent }) chartWrapperTop: LineChartWrapperComponent
   @ViewChild('chartWrapperBottom', { read: LineChartWrapperComponent }) chartWrapperBottom: LineChartWrapperComponent
@@ -344,5 +347,14 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
 
   private dataSetUpdate(min: number, max: number): number[] {
     return generateDataset(min, max, this.pCount)
+  }
+
+  printPdf() {
+    this.printBrowser(['chart-container'])
+  }
+
+  printBrowser(ids) {
+    const domNodes = ids.map((id) => document.getElementById(id))
+    this.printHelper.print(domNodes)
   }
 }
