@@ -35,7 +35,6 @@ import { DEBOUNCE_TIME_SMALL } from '@src/app/common/constants/constants'
 import { debounceTime, fromEvent } from 'rxjs'
 import * as htmlToImage from 'html-to-image'
 import { PopupsStoreService } from '@src/app/common/shared/services/popups-store.service'
-import { PrintHelper } from '@src/app/common/utils/print-helper'
 
 interface ChartInfo {
   dataSet: number[]
@@ -50,6 +49,7 @@ interface ChartInfo {
 })
 export class VerticalLineSyncSandboxComponent implements OnInit {
   readonly POPUP_HEIGHT = 175
+  readonly PREVIEW_WIDTH = 800
 
   pCount = 100
 
@@ -87,8 +87,6 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
   customPointsHandler = customPointsHandler
   currentDomain: Domain
 
-  printHelper = new PrintHelper()
-
   @ViewChild('chartWrapperTop', { read: LineChartWrapperComponent }) chartWrapperTop: LineChartWrapperComponent
   @ViewChild('chartWrapperBottom', { read: LineChartWrapperComponent }) chartWrapperBottom: LineChartWrapperComponent
   @ViewChild('chartsContainer', { read: ElementRef }) chartsContainer: ElementRef<HTMLDivElement>
@@ -106,7 +104,7 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 8; i++) {
       this.chartInfos.push({
         dataSet: this.dataSetUpdate(this.minY[i], this.maxY[i]),
         chartId: `chart_${generateId()}`,
@@ -350,11 +348,7 @@ export class VerticalLineSyncSandboxComponent implements OnInit {
   }
 
   printPdf() {
-    this.printBrowser(['chart-container'])
-  }
-
-  printBrowser(ids) {
-    const domNodes = ids.map((id) => document.getElementById(id))
-    this.printHelper.print(domNodes)
+    document.body.style.setProperty('--print-size', `${(this.PREVIEW_WIDTH / document.body.clientWidth) * 100}%`)
+    window.print()
   }
 }

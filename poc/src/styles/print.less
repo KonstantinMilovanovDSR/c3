@@ -1,0 +1,14 @@
+@media print {
+    body {
+        zoom: var(--print-size);
+        margin: 0;
+        -webkit-print-color-adjust: exact;
+    }
+	.pe-no-print {
+		display: none !important;
+	}
+
+    .print-container {
+        overflow: visible !important;
+    }
+}

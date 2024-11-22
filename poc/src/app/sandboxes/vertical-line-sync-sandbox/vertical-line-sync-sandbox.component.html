@@ -1,5 +1,5 @@
 <div class="vertical-line-sync-sandbox">
-  <div class="vertical-line-sync-sandbox__chart-toolbar">
+  <div class="pe-no-print vertical-line-sync-sandbox__chart-toolbar">
     <button class="input-container__button mat-button mat-raised-button" (click)="zoomIn()">Zoom In</button>
     <button class="input-container__button mat-button mat-raised-button" (click)="zoomOut()">Zoom Out</button>
     <button class="input-container__button mat-button mat-raised-button" (click)="zoomReset()">Zoom Reset</button>
@@ -46,7 +46,7 @@
       <mat-slide-toggle [(ngModel)]="yGridLinesTopLimitEnabled" (change)="toggleTopLimit()">Toggle top limit</mat-slide-toggle>
     </div>
   </div>
-  <div class="vertical-line-sync-sandbox__charts" #chartsContainer>
+  <div class="vertical-line-sync-sandbox__charts print-container" #chartsContainer>
     <div class="vertical-line-sync-sandbox__chart-content chart-content">
       <lw-line-chart-wrapper
         [chartId]="chartInfos[0].chartId"
@@ -74,6 +74,150 @@
     <div class="vertical-line-sync-sandbox__chart-content chart-content">
       <lw-line-chart-wrapper
         [chartId]="chartInfos[1].chartId"
+        [dataSet]="chartInfos[1].dataSet"
+        [size]="chartSize"
+        [yGridLines]="yGridLines"
+        [yGridLinesTopLimitEnabled]="yGridLinesTopLimitEnabled"
+        [isDomainCorrect]="isDomainCorrect"
+        [customPoints]="customPoints"
+        [customPointsHandler]="customPointsHandler"
+        [selectedPoints]="selectedPoints"
+        [useSelection]="true"
+        [maxDataSetValueLength]="maxDataSetValueLengths[1]"
+        [xAxisRotated]="rotated"
+        (showXGridFocus)="onShowXGridFocusBottom($event)"
+        (hideXGridFocus)="onHideXGridFocusBottom()"
+        (zoom)="onZoomBottom($event)"
+        (zoomStart)="onZoomStartBottom()"
+        (zoomEnd)="onZoomEndBottom($event)"
+        [formatX]="formatX"
+        [formatY]="formatY"
+        #chartWrapperBottom
+      ></lw-line-chart-wrapper>
+    </div>
+    <div class="vertical-line-sync-sandbox__chart-content chart-content">
+      <lw-line-chart-wrapper
+        [chartId]="chartInfos[2].chartId"
+        [dataSet]="chartInfos[0].dataSet"
+        [size]="chartSize"
+        [hideXTicks]="true"
+        [yGridLines]="yGridLines"
+        [yGridLinesTopLimitEnabled]="yGridLinesTopLimitEnabled"
+        [isDomainCorrect]="isDomainCorrect"
+        [customPoints]="customPoints"
+        [customPointsHandler]="customPointsHandler"
+        [selectedPoints]="selectedPoints"
+        [maxDataSetValueLength]="maxDataSetValueLengths[0]"
+        [useSelection]="true"
+        (showXGridFocus)="onShowXGridFocusTop($event)"
+        (hideXGridFocus)="onHideXGridFocusTop()"
+        (zoom)="onZoomTop($event)"
+        (zoomStart)="onZoomStartTop()"
+        (zoomEnd)="onZoomEndTop($event)"
+        [formatX]="formatX"
+        [formatY]="formatY"
+        #chartWrapperTop
+      ></lw-line-chart-wrapper>
+    </div>
+    <div class="vertical-line-sync-sandbox__chart-content chart-content">
+      <lw-line-chart-wrapper
+        [chartId]="chartInfos[3].chartId"
+        [dataSet]="chartInfos[1].dataSet"
+        [size]="chartSize"
+        [yGridLines]="yGridLines"
+        [yGridLinesTopLimitEnabled]="yGridLinesTopLimitEnabled"
+        [isDomainCorrect]="isDomainCorrect"
+        [customPoints]="customPoints"
+        [customPointsHandler]="customPointsHandler"
+        [selectedPoints]="selectedPoints"
+        [useSelection]="true"
+        [maxDataSetValueLength]="maxDataSetValueLengths[1]"
+        [xAxisRotated]="rotated"
+        (showXGridFocus)="onShowXGridFocusBottom($event)"
+        (hideXGridFocus)="onHideXGridFocusBottom()"
+        (zoom)="onZoomBottom($event)"
+        (zoomStart)="onZoomStartBottom()"
+        (zoomEnd)="onZoomEndBottom($event)"
+        [formatX]="formatX"
+        [formatY]="formatY"
+        #chartWrapperBottom
+      ></lw-line-chart-wrapper>
+    </div>
+    <div class="vertical-line-sync-sandbox__chart-content chart-content">
+      <lw-line-chart-wrapper
+        [chartId]="chartInfos[4].chartId"
+        [dataSet]="chartInfos[1].dataSet"
+        [size]="chartSize"
+        [hideXTicks]="true"
+        [yGridLines]="yGridLines"
+        [yGridLinesTopLimitEnabled]="yGridLinesTopLimitEnabled"
+        [isDomainCorrect]="isDomainCorrect"
+        [customPoints]="customPoints"
+        [customPointsHandler]="customPointsHandler"
+        [selectedPoints]="selectedPoints"
+        [maxDataSetValueLength]="maxDataSetValueLengths[0]"
+        [useSelection]="true"
+        (showXGridFocus)="onShowXGridFocusTop($event)"
+        (hideXGridFocus)="onHideXGridFocusTop()"
+        (zoom)="onZoomTop($event)"
+        (zoomStart)="onZoomStartTop()"
+        (zoomEnd)="onZoomEndTop($event)"
+        [formatX]="formatX"
+        [formatY]="formatY"
+        #chartWrapperTop
+      ></lw-line-chart-wrapper>
+    </div>
+    <div class="vertical-line-sync-sandbox__chart-content chart-content">
+      <lw-line-chart-wrapper
+        [chartId]="chartInfos[5].chartId"
+        [dataSet]="chartInfos[1].dataSet"
+        [size]="chartSize"
+        [yGridLines]="yGridLines"
+        [yGridLinesTopLimitEnabled]="yGridLinesTopLimitEnabled"
+        [isDomainCorrect]="isDomainCorrect"
+        [customPoints]="customPoints"
+        [customPointsHandler]="customPointsHandler"
+        [selectedPoints]="selectedPoints"
+        [useSelection]="true"
+        [maxDataSetValueLength]="maxDataSetValueLengths[1]"
+        [xAxisRotated]="rotated"
+        (showXGridFocus)="onShowXGridFocusBottom($event)"
+        (hideXGridFocus)="onHideXGridFocusBottom()"
+        (zoom)="onZoomBottom($event)"
+        (zoomStart)="onZoomStartBottom()"
+        (zoomEnd)="onZoomEndBottom($event)"
+        [formatX]="formatX"
+        [formatY]="formatY"
+        #chartWrapperBottom
+      ></lw-line-chart-wrapper>
+    </div>
+    <div class="vertical-line-sync-sandbox__chart-content chart-content">
+      <lw-line-chart-wrapper
+        [chartId]="chartInfos[6].chartId"
+        [dataSet]="chartInfos[0].dataSet"
+        [size]="chartSize"
+        [hideXTicks]="true"
+        [yGridLines]="yGridLines"
+        [yGridLinesTopLimitEnabled]="yGridLinesTopLimitEnabled"
+        [isDomainCorrect]="isDomainCorrect"
+        [customPoints]="customPoints"
+        [customPointsHandler]="customPointsHandler"
+        [selectedPoints]="selectedPoints"
+        [maxDataSetValueLength]="maxDataSetValueLengths[0]"
+        [useSelection]="true"
+        (showXGridFocus)="onShowXGridFocusTop($event)"
+        (hideXGridFocus)="onHideXGridFocusTop()"
+        (zoom)="onZoomTop($event)"
+        (zoomStart)="onZoomStartTop()"
+        (zoomEnd)="onZoomEndTop($event)"
+        [formatX]="formatX"
+        [formatY]="formatY"
+        #chartWrapperTop
+      ></lw-line-chart-wrapper>
+    </div>
+    <div class="vertical-line-sync-sandbox__chart-content chart-content">
+      <lw-line-chart-wrapper
+        [chartId]="chartInfos[7].chartId"
         [dataSet]="chartInfos[1].dataSet"
         [size]="chartSize"
         [yGridLines]="yGridLines"
