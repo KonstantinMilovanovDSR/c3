@@ -91,6 +91,7 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
         },
         onzoomend: (domain: Domain) => {
           this.onZoomEnd(domain)
+          this.eventBus.emit({ type: CHART_EVENT_TYPE.ZOOM })
         },
       },
       legend: {
@@ -225,8 +226,10 @@ export class LineChartWrapperComponent extends ChartWrapperBaseComponent impleme
   protected override refreshYGrids(): void {
     this.instance?.ygrids(this.yGridLines)
     const maxYLine = this.getMaxYLine()
-    if (this.yGridLinesTopLimitEnabled && maxYLine) {
-      this.topLimitEnable(maxYLine)
+    const minYLine = this.getMinYLine()
+    const maxAbsLine = Math.abs(maxYLine) > Math.abs(minYLine) ? maxYLine : minYLine
+    if (this.yGridLinesTopLimitEnabled && maxAbsLine) {
+      this.topLimitEnable(maxAbsLine)
     } else {
       this.topLimitDisable()
     }
