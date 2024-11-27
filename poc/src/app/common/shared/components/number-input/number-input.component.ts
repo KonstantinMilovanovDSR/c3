@@ -116,12 +116,12 @@ export class NumberInputComponent implements ControlValueAccessor, OnInit {
 
   @HostListener('input')
   handleInput() {
-    this.inputElement.value = this.inputElement.value.replace(/[e\+\-\,\.]/gi, '')
+    this.inputElement.value = this.inputElement.value.replace(/[e\+\,\.]/gi, '')
   }
 
   @HostListener('keydown', ['$event'])
   handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'e' || event.key === '+' || event.key === '-' || event.key === ',' || event.key === '.') {
+    if (event.key === 'e' || event.key === '+' || event.key === ',' || event.key === '.') {
       event.preventDefault()
       return
     }

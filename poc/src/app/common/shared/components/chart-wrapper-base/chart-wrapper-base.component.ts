@@ -217,6 +217,12 @@ export abstract class ChartWrapperBaseComponent implements OnInit, AfterViewInit
     }
   }
 
+  protected getMinYLine(): number | undefined {
+    if (this.yGridLines?.length > 0) {
+      return Math.min(...this.yGridLines.map((l) => l.value))
+    }
+  }
+
   zoomStep(zoomType: 'in' | 'out'): void {
     const zoomCoef = ZOOM_COEFFICIENT_DEFAULT
     const domain = this.getCurrentXDomain()
