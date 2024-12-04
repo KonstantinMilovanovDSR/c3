@@ -126,10 +126,7 @@ ChartInternal.prototype.updateGrid = function (duration) {
         .attr("x2", config.axis_rotated ? $$.width : xv)
         .attr("y1", config.axis_rotated ? xv : 0)
         .attr("y2", config.axis_rotated ? xv : $$.height)
-        .style("opacity", 0)
-        .style("stroke", function(d) {
-          return d.color ? d.color : ''; // Add x grid line color
-        });
+        .style("opacity", 0);
     xgridLineEnter.append('text')
         .attr("text-anchor", $$.gridTextAnchor)
         .attr("transform", config.axis_rotated ? "" : "rotate(-90)")
@@ -137,10 +134,7 @@ ChartInternal.prototype.updateGrid = function (duration) {
         .attr("y", xv)
         .attr('dx', $$.gridTextDx)
         .attr('dy', -5)
-        .style("opacity", 0)
-        .style("fill", function(d) {
-          return d.color ? d.color : ''; // Add x grid text color
-        });
+        .style("opacity", 0);
     // udpate
     $$.xgridLines = xgridLineEnter.merge(xgridLine);
     // done in d3.transition() of the end of this function
@@ -163,10 +157,8 @@ ChartInternal.prototype.updateGrid = function (duration) {
         .attr("x2", config.axis_rotated ? yv : $$.width)
         .attr("y1", config.axis_rotated ? 0 : yv)
         .attr("y2", config.axis_rotated ? $$.height : yv)
-        .style("opacity", 0)
-        .style("stroke", function(d) {
-          return d.color ? d.color : ''; // Add y grid line color
-        });
+        .style("opacity", 0);
+
     ygridLineEnter.append('text')
         .attr("text-anchor", $$.gridTextAnchor)
         .attr("transform", config.axis_rotated ? "rotate(-90)" : "")
@@ -174,10 +166,7 @@ ChartInternal.prototype.updateGrid = function (duration) {
         .attr("y", yv)
         .attr('dx', $$.gridTextDx)
         .attr('dy', -5)
-        .style("opacity", 0)
-        .style("fill", function(d) {
-          return d.color ? d.color : ''; // Add y grid text color
-        });
+        .style("opacity", 0);
     // update
     $$.ygridLines = ygridLineEnter.merge(ygridLine);
     $$.ygridLines.select('line')
@@ -186,13 +175,19 @@ ChartInternal.prototype.updateGrid = function (duration) {
         .attr("x2", config.axis_rotated ? yv : $$.width)
         .attr("y1", config.axis_rotated ? 0 : yv)
         .attr("y2", config.axis_rotated ? $$.height : yv)
-        .style("opacity", 1);
+        .style("opacity", 1)
+        .style("stroke", function(d) {
+          return d.color ? d.color : ''; // Add y grid line color
+        });
     $$.ygridLines.select('text')
       .transition().duration(duration)
         .attr("x", config.axis_rotated ? $$.xGridTextX.bind($$) : $$.yGridTextX.bind($$))
         .attr("y", yv)
         .text(function (d) { return d.text; })
-        .style("opacity", 1);
+        .style("opacity", 1)
+        .style("fill", function(d) {
+          return d.color ? d.color : ''; // Add y grid text color
+        });
     // exit
     ygridLine.exit().transition().duration(duration)
         .style("opacity", 0)
@@ -208,12 +203,18 @@ ChartInternal.prototype.redrawGrid = function (withTransition, transition) {
             .attr("x2", config.axis_rotated ? $$.width : xv)
             .attr("y1", config.axis_rotated ? xv : 0)
             .attr("y2", config.axis_rotated ? xv : $$.height)
-            .style("opacity", 1),
+            .style("opacity", 1)
+            .style("stroke", function(d) {
+              return d.color ? d.color : ''; // Add x grid line color
+            }),
         (withTransition ? texts.transition(transition) : texts)
             .attr("x", config.axis_rotated ? $$.yGridTextX.bind($$) : $$.xGridTextX.bind($$))
             .attr("y", xv)
             .text(function (d) { return d.text; })
             .style("opacity", 1)
+            .style("fill", function(d) {
+              return d.color ? d.color : ''; // Add x grid text color
+            })
     ];
 };
 ChartInternal.prototype.showXGridFocus = function (selectedData) {
