@@ -412,7 +412,6 @@ AxisInternal.prototype.generateAxis = function () {
             } else {
                 size = axis.g.selectAll('line').size()
             }
-            console.log(size)
             length = axis.g.select('path.domain').node().getTotalLength() - internal.outerTickSize * 2;
             interval = mult * ( length / size);
         }
