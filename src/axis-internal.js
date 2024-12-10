@@ -259,8 +259,9 @@ AxisInternal.prototype.generateAxis = function () {
                 tickX = internal.tickCentered ? 0 : internal.tickOffset;
                 tickY = internal.tickCentered ? internal.tickOffset : 0;
             } else if (params.syncScale) {
-                const ticksRange = ticksValues[ticksValues.length - 1]
-                internal.tickOffset = (scale1(1) - scale1(0)) / (internal.scale.range()[1] / Math.floor(ticksRange));
+                const step = Math.abs(ticksValues[1] - ticksValues[0])
+                const ticksRange = Math.abs(ticksValues[ticksValues.length - 1] - ticksValues[0]) + step
+                internal.tickOffset = (scale1(1) - scale1(0)) / (internal.scale.range()[1] / ticksRange);
             } else {
                 internal.tickOffset = tickX = 0;
             }
