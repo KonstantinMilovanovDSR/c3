@@ -259,7 +259,7 @@ AxisInternal.prototype.generateAxis = function () {
                 tickX = internal.tickCentered ? 0 : internal.tickOffset;
                 tickY = internal.tickCentered ? internal.tickOffset : 0;
             } else if (params.syncScale) {
-                const step = Math.abs(ticksValues[1] - ticksValues[0])
+                const step = ticksValues.length > 1 ? Math.abs(ticksValues[1] - ticksValues[0]) : 1;
                 const ticksRange = Math.abs(ticksValues[ticksValues.length - 1] - ticksValues[0]) + step
                 internal.tickOffset = (scale1(1) - scale1(0)) / (internal.scale.range()[1] / ticksRange);
             } else {
