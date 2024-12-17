@@ -322,28 +322,33 @@ Axis.prototype.getMaxTickWidth = function getMaxTickWidth(id, withoutRecompute) 
             useBBox = config.axis_x_tick_optimizeWidthCalculation;
             this.updateXAxisTickValues(targetsToShow, axis);
         }
+
+      if (!(config.context.maxTickWidthHandler && config.context.maxTickWidthHandler[id])) {
         dummy = $$.d3.select('body').append('div').classed('c3', true);
         svg = dummy.append("svg").style('visibility', 'hidden').style('position', 'fixed').style('top', 0).style('left', 0),
-            svg.append('g').call(axis).each(function () {
-                $$.d3.select(this).selectAll('text').each(function () {
-                    if (config.axis_optimizeMaxTickWidthCalculation) {
-                        var currentTextLength = this.childNodes[0].innerHTML.length;
-                        if (!textWithMaxLength || currentTextLength > textMaxLength) {
-                            textMaxLength = currentTextLength;
-                            textWithMaxLength = this;
-                        }
-                        return;
-                    }
-                    var box = useBBox ? this.getBBox() : this.getBoundingClientRect();
-                    if (maxWidth < box.width) {
-                        maxWidth = box.width;
-                    }
-                });
-                if (config.axis_optimizeMaxTickWidthCalculation && textWithMaxLength) {
-                    maxWidth = useBBox ? textWithMaxLength.getBBox().width : textWithMaxLength.getBoundingClientRect().width;
+          svg.append('g').call(axis).each(function() {
+            $$.d3.select(this).selectAll('text').each(function() {
+              if (config.axis_optimizeMaxTickWidthCalculation) {
+                var currentTextLength = this.childNodes[0].innerHTML.length;
+                if (!textWithMaxLength || currentTextLength > textMaxLength) {
+                  textMaxLength = currentTextLength;
+                  textWithMaxLength = this;
                 }
-                dummy.remove();
+                return;
+              }
+              var box = useBBox ? this.getBBox() : this.getBoundingClientRect();
+              if (maxWidth < box.width) {
+                maxWidth = box.width;
+              }
             });
+            if (config.axis_optimizeMaxTickWidthCalculation && textWithMaxLength) {
+              maxWidth = useBBox ? textWithMaxLength.getBBox().width : textWithMaxLength.getBoundingClientRect().width;
+            }
+            dummy.remove();
+          });
+      } else {
+        maxWidth = config.context.maxTickWidthHandler[id].getMaxTickWidth($$)
+      }
     }
     $$.currentMaxTickWidths[id] = maxWidth <= 0 ? $$.currentMaxTickWidths[id] : maxWidth;
     return $$.currentMaxTickWidths[id];
