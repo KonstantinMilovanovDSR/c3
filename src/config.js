@@ -268,6 +268,7 @@ ChartInternal.prototype.getDefaultConfig = function () {
         bar_width_max: undefined,
         bar_zerobased: true,
         bar_space: 0,
+        bar_syncScale: undefined,
         // area
         area_zerobased: true,
         area_above: false,
@@ -354,7 +355,8 @@ ChartInternal.prototype.getDefaultConfig = function () {
             bottom: 0,
             left: 0
         },
-        title_position: 'top-center'
+        title_position: 'top-center',
+      context: {}
     };
 
     Object.keys(this.additionalConfig).forEach(function (key) {
@@ -390,4 +392,47 @@ ChartInternal.prototype.loadConfig = function (config) {
             this_config[key] = read;
         }
     });
+    if (config.context) {
+      this_config.context = config.context || {};
+    }
+};
+
+ChartInternal.prototype.isSelectByClickDisabled = function (d) {
+  const config = this.config;
+  return !!(config.context.isSelectByClickDisabled && config.context.isSelectByClickDisabled(d));
+};
+
+ChartInternal.prototype.isHideXLabelIfNotVisibleDisabled = function (id) {
+  const config = this.config;
+  return !!(config.context.isHideXLabelIfNotVisibleDisabled && config.context.isHideXLabelIfNotVisibleDisabled(id));
+};
+
+ChartInternal.prototype.isMouseOverDisabled = function (d) {
+  const config = this.config;
+  return !!(config.context.isMouseOverDisabled && config.context.isMouseOverDisabled(d));
+};
+
+ChartInternal.prototype.isDataDisabled = function (id) {
+  const config = this.config;
+  return !!(config.context.isDataDisabled && config.context.isDataDisabled(id));
+};
+
+ChartInternal.prototype.isShowXGridFocusDisabled = function (d) {
+  const config = this.config;
+  return !!(config.context.isShowXGridFocusDisabled && config.context.isShowXGridFocusDisabled(d));
+};
+
+ChartInternal.prototype.limitAxisMaxLength = function (x) {
+  const config = this.config;
+  return !!(config.context.limitAxisMaxLength && config.context.limitAxisMaxLength(x));
+};
+
+ChartInternal.prototype.onShowXGridFocus = function (d) {
+  const config = this.config;
+  return !!(config.context.onShowXGridFocus && config.context.onShowXGridFocus(d));
+};
+
+ChartInternal.prototype.onHideXGridFocus = function () {
+  const config = this.config;
+  return !!(config.context.onHideXGridFocus && config.context.onHideXGridFocus());
 };
