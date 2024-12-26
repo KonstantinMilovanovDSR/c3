@@ -24,10 +24,35 @@ function AxisInternal(component, params) {
     internal.axis = internal.generateAxis();
 }
 
-AxisInternal.prototype.axisX = function (selection, x, tickOffset) {
+AxisInternal.prototype.axisX = function (selection, x, tickOffset, internal) {
     selection.attr("transform", function (d) {
         return "translate(" + Math.ceil(x(d) + tickOffset) + ", 0)";
     });
+    // TODO: add chart types in which we could disable this functionality
+    var context = internal.component.owner.config.context;
+    if (context.isHideXLabelIfNotVisibleDisabled && context.isHideXLabelIfNotVisibleDisabled('id')) {
+        return;
+    }
+    selection.attr('style', function (d) {
+        const offset = Math.ceil(x(d) + tickOffset);
+        return 'opacity: ' + (offset < 0 ? '0' : '1');
+    });
+
+    var tspans = selection
+        .select('text')
+        .select('tspan')
+        .text(function (d) {
+            if (context.limitAxisMaxLength) {
+                return context.limitAxisMaxLength(internal.textFormatted(d));
+            }
+            return internal.textFormatted(d);
+        });
+    if (tspans && tspans.append) {
+        tspans.append("title")
+            .text(function (d) {
+                return internal.textFormatted(d);
+            });
+    }
 };
 AxisInternal.prototype.axisY = function (selection, y) {
     selection.attr("transform", function (d) {
@@ -233,6 +258,10 @@ AxisInternal.prototype.generateAxis = function () {
                 internal.tickOffset = Math.ceil((scale1(1) - scale1(0)) / 2);
                 tickX = internal.tickCentered ? 0 : internal.tickOffset;
                 tickY = internal.tickCentered ? internal.tickOffset : 0;
+            } else if (params.syncScale) {
+                const step = ticksValues.length > 1 ? Math.abs(ticksValues[1] - ticksValues[0]) : 1;
+                const ticksRange = Math.abs(ticksValues[ticksValues.length - 1] - ticksValues[0]) + step
+                internal.tickOffset = (scale1(1) - scale1(0)) / (internal.scale.range()[1] / ticksRange);
             } else {
                 internal.tickOffset = tickX = 0;
             }
@@ -275,7 +304,7 @@ AxisInternal.prototype.generateAxis = function () {
                     pathUpdate.attr("d", "M" + internal.range[0] + "," + internal.outerTickSize + "V0H" + internal.range[1] + "V" + internal.outerTickSize);
                     break;
                 }
-      
+
                 case "top": {
                     // TODO: rotated tick text
                     tickTransform = internal.axisX;
@@ -297,7 +326,7 @@ AxisInternal.prototype.generateAxis = function () {
                     pathUpdate.attr("d", "M" + internal.range[0] + "," + -internal.outerTickSize + "V0H" + internal.range[1] + "V" + -internal.outerTickSize);
                     break;
                 }
-      
+
                 case "left": {
                     tickTransform = internal.axisY;
                     lineUpdate.attr("x2", -internal.innerTickSize)
@@ -313,7 +342,7 @@ AxisInternal.prototype.generateAxis = function () {
                     pathUpdate.attr("d", "M" + -internal.outerTickSize + "," + internal.range[0] + "H0V" + internal.range[1] + "H" + -internal.outerTickSize);
                     break;
                 }
-      
+
                 case "right": {
                     tickTransform = internal.axisY;
                     lineUpdate.attr("x2", internal.innerTickSize)
@@ -338,12 +367,12 @@ AxisInternal.prototype.generateAxis = function () {
             } else if (scale0.rangeBand) {
                 scale0 = scale1;
             } else {
-                tickExit.call(tickTransform, scale1, internal.tickOffset);
+                tickExit.call(tickTransform, scale1, internal.tickOffset, internal);
             }
-            tickEnter.call(tickTransform, scale0, internal.tickOffset);
+            tickEnter.call(tickTransform, scale0, internal.tickOffset, internal);
             self = (transition ? tickUpdate.transition(transition) : tickUpdate)
                 .style('opacity', 1)
-                .call(tickTransform, scale1, internal.tickOffset);
+                .call(tickTransform, scale1, internal.tickOffset, internal);
         });
         return self;
     }
@@ -376,8 +405,16 @@ AxisInternal.prototype.generateAxis = function () {
             interval = internal.tickOffset * 2;
         }
         else {
+            let mult = 1
+            let size
+            if (params.syncScale) {
+                mult = internal.tickOffset
+                size = internal.component.owner.data.targets[0].values.length
+            } else {
+                size = axis.g.selectAll('line').size()
+            }
             length = axis.g.select('path.domain').node().getTotalLength() - internal.outerTickSize * 2;
-            interval = length / axis.g.selectAll('line').size();
+            interval = mult * ( length / size);
         }
         return interval === Infinity ? 0 : interval;
     };

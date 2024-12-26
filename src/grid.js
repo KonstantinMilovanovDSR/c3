@@ -158,6 +158,7 @@ ChartInternal.prototype.updateGrid = function (duration) {
         .attr("y1", config.axis_rotated ? 0 : yv)
         .attr("y2", config.axis_rotated ? $$.height : yv)
         .style("opacity", 0);
+
     ygridLineEnter.append('text')
         .attr("text-anchor", $$.gridTextAnchor)
         .attr("transform", config.axis_rotated ? "rotate(-90)" : "")
@@ -174,13 +175,19 @@ ChartInternal.prototype.updateGrid = function (duration) {
         .attr("x2", config.axis_rotated ? yv : $$.width)
         .attr("y1", config.axis_rotated ? 0 : yv)
         .attr("y2", config.axis_rotated ? $$.height : yv)
-        .style("opacity", 1);
+        .style("opacity", 1)
+        .style("stroke", function(d) {
+          return d.color ? d.color : ''; // Add y grid line color
+        });
     $$.ygridLines.select('text')
       .transition().duration(duration)
         .attr("x", config.axis_rotated ? $$.xGridTextX.bind($$) : $$.yGridTextX.bind($$))
         .attr("y", yv)
         .text(function (d) { return d.text; })
-        .style("opacity", 1);
+        .style("opacity", 1)
+        .style("fill", function(d) {
+          return d.color ? d.color : ''; // Add y grid text color
+        });
     // exit
     ygridLine.exit().transition().duration(duration)
         .style("opacity", 0)
@@ -196,12 +203,18 @@ ChartInternal.prototype.redrawGrid = function (withTransition, transition) {
             .attr("x2", config.axis_rotated ? $$.width : xv)
             .attr("y1", config.axis_rotated ? xv : 0)
             .attr("y2", config.axis_rotated ? xv : $$.height)
-            .style("opacity", 1),
+            .style("opacity", 1)
+            .style("stroke", function(d) {
+              return d.color ? d.color : ''; // Add x grid line color
+            }),
         (withTransition ? texts.transition(transition) : texts)
             .attr("x", config.axis_rotated ? $$.yGridTextX.bind($$) : $$.xGridTextX.bind($$))
             .attr("y", xv)
             .text(function (d) { return d.text; })
             .style("opacity", 1)
+            .style("fill", function(d) {
+              return d.color ? d.color : ''; // Add x grid text color
+            })
     ];
 };
 ChartInternal.prototype.showXGridFocus = function (selectedData) {
@@ -218,9 +231,11 @@ ChartInternal.prototype.showXGridFocus = function (selectedData) {
         .attr(config.axis_rotated ? 'y1' : 'x1', xx)
         .attr(config.axis_rotated ? 'y2' : 'x2', xx);
     $$.smoothLines(focusEl, 'grid');
+    $$.onShowXGridFocus(dataToShow[0])
 };
 ChartInternal.prototype.hideXGridFocus = function () {
     this.main.select('line.' + CLASS.xgridFocus).style("visibility", "hidden");
+    this.onHideXGridFocus()
 };
 ChartInternal.prototype.updateXgridFocus = function () {
     var $$ = this, config = $$.config;
